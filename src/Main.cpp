@@ -8,29 +8,29 @@ int main(int argc, char **argv) {
         std::cerr << "É necessário especificar: "
                      "<argumento> <arquivo de entrada> <arquivo de saída>"
                   << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    std::string flag(argv[1]), src(argv[2]), dst(argv[3]);
-    Driver driver(flag, src, dst);
+    std::string flag(argv[1]);
+    sb::Driver driver;
 
     if (flag == "-p") {
-        driver.preProcess();
+        driver.preProcess(argv[2]);
     }
     else if (flag == "-m") {
-        driver.macroProcess();
+        driver.macroProcess(argv[2]);
     }
     else if (flag == "-o") {
-        driver.onePassProcess();
+        driver.onePassProcess(argv[2]);
     }
     else {
         std::cerr << "Argumento inválido. "
                      "Utilize -p para pré processamento,"
                      "-m para expansão de macros e "
                      "-o para montagem completa." << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
