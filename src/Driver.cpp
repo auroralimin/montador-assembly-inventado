@@ -27,10 +27,9 @@ void sb::Driver::preParse(std::istream &stream) {
         exit(EXIT_FAILURE);
     }
 
-    std::cout << std::endl;
-    std::cout << "EQU map:" << std::endl;
-    for (auto equ : equMap) {
-        std::cout << equ.first << ": " << equ.second << "." << std::endl; 
+    std::cout << "Arquivo pré-processado:" << std::endl;
+    for (auto line : preMap) {
+        std::cout << "    " << line.second << std::endl; 
     }
 }
 
@@ -46,5 +45,27 @@ void sb::Driver::onePassProcess(const char *const srcFile) {
 
 void sb::Driver::insertEqu(std::string label, int value) {
     equMap[label] = value;
+}
+
+void sb::Driver::insertLine(int nLine, std::string line) {
+    preMap[nLine] = line;
+}
+
+int sb::Driver::getEqu(std::string label, int nLine) {
+    std::map<std::string, int>::iterator it = equMap.find(label);
+    
+    if (it == equMap.end()) {
+        std::cerr << "Erro semantico (linha: "
+                  << nLine << ") : IF para rótulo não declarado." << std::endl;
+    }
+
+    return it->second;
+}
+
+void sb::Driver::deleteLine(int nLine) {
+    std::map<int, std::string>::iterator it = preMap.find(nLine);
+    
+    if (it == preMap.end()) return;
+    preMap.erase(it);
 }
 

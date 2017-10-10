@@ -2,6 +2,7 @@
     #include <string>
 
     #include "PreScanner.hpp"
+    #include "PreParser.hxx"
     #undef  YY_DECL
     #define YY_DECL int sb::PreScanner::yylex(\
                             sb::PreParser::semantic_type *const lval,\
@@ -26,8 +27,15 @@
 %{ 
             yylval = lval;
 %}
+\n                    {
+                      nLine++;
+                      return token::ENDL;
+                      }
 :                     {
                       return token::COLON;
+                      }
+IF                    {
+                      return token::EQU_IF;
                       }
 [a-zA-Z]+[a-zA-Z0-9]* {
                       yylval->build<std::string>(yytext);
@@ -40,11 +48,12 @@ EQU[ \t][0-1]         {
                       yylval->build<int>(stoi(value));
                       return token::EQU_VAL;
                       }
-IF                    {
-                      return token::EQU_IF;
-                      }
-;.+\n                 ;
-[ \n\t]               ;
+;.+                   ;
+[ \t]                 ;
 .                     ;
 %%
+
+int sb::PreScanner::getLine() {
+    return nLine;
+}
 

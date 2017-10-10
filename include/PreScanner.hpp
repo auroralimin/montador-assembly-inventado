@@ -17,10 +17,12 @@ namespace sb{
             virtual ~PreScanner() {};
             virtual int yylex(sb::PreParser::semantic_type * const lval, 
                               sb::PreParser::location_type *location);
+            int getLine();
+
         private:
             sb::PreParser::semantic_type *yylval = nullptr;
+            int nLine = 0;
     };
-
 }
 
 #endif

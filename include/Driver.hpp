@@ -22,8 +22,12 @@ namespace sb{
         private:
             void preParse(std::istream &stream);
             void insertEqu(std::string label, int value);
+            void insertLine(int nLine, std::string line);
+            int getEqu(std::string label, int nLine);
+            void deleteLine(int nLine);
 
             std::map<std::string, int> equMap;
+            std::map<int, std::string> preMap;
     };
 }
 

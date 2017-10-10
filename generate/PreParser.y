@@ -23,32 +23,84 @@
     #define yylex preScanner.yylex
 }
 
-%token               COLON
+%token               COLON 
 %token <std::string> NAME
 %token <int>         EQU_VAL
-%token               EQU_IF
-%token               END 0 "end of file"
+%token <std::string> EQU_IF
+%token               ENDL
+%token               END 0 
+
+%type <std::string> line
+%type <std::string> label
+%type <std::string> command
 
 %locations
 
 %%
 
 pre_processor
-    : equ pre_processor {}
-    | COLON pre_processor {
-        std::cout << "Bison encontrou dois pontos." << std::endl; }
-    | NAME pre_processor {
-        std::cout << "Bison encontrou um nome: " << $1 << "." << std::endl; }
-    | equ {}
-    | COLON {
-        std::cout << "Bison encontrou dois pontos." << "." << std::endl; }
-    | NAME {
-        std::cout << "Bison encontrou um nome: " << $1 << "." << std::endl; }
-	;
+    : equ  pre_processor
+    | equ
+    | if   pre_processor
+    | if
+    | line pre_processor
+    | line
+    | ENDL pre_processor
+    | ENDL
+    ;
 
+line
+    : label ENDL {
+          $$ = $1 + ": ";
+          driver.insertLine(preScanner.getLine(), $$);
+      }
+    | label command ENDL {
+          $$ = $1 + ": " + $2;
+          driver.insertLine(preScanner.getLine(), $$);
+      }
+    | command ENDL {
+          $$ = $1;
+          driver.insertLine(preScanner.getLine(), $$);
+      }
+    ;
+
+command
+    : NAME command {
+          $$ = $1 + " " + $2;
+     }
+    | NAME {
+          $$ = $1;
+      }
+    ;
+    
 equ
-    : NAME COLON EQU_VAL {
-        driver.insertEqu($1, $3); }
+    : label EQU_VAL ENDL {
+          driver.insertEqu($1, $2);
+      }
+    | label ENDL EQU_VAL ENDL {
+          driver.insertEqu($1, $3);
+      }
+    ;
+
+if
+    : EQU_IF NAME line {
+          int nLine = preScanner.getLine();
+          if (!driver.getEqu($2, nLine)) {
+              driver.deleteLine(nLine);
+          }
+      }
+    | EQU_IF NAME ENDL line {
+          int nLine = preScanner.getLine();
+          if (!driver.getEqu($2, nLine)) {
+              driver.deleteLine(nLine);
+          }
+      }
+    ;
+
+label
+    : NAME COLON {
+          $$ = $1;
+      }
     ;
 
 %%
