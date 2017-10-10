@@ -33,3 +33,7 @@ montador
 *.hxx
 *.hh
 
+# Arquivos de output
+*.pre
+*.mcr
+

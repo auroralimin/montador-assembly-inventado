@@ -15,13 +15,13 @@ int main(int argc, char **argv) {
     sb::Driver driver;
 
     if (flag == "-p") {
-        driver.preProcess(argv[2]);
+        driver.preProcess(argv[2], argv[3]);
     }
     else if (flag == "-m") {
-        driver.macroProcess(argv[2]);
+        driver.macroProcess(argv[2], argv[3]);
     }
     else if (flag == "-o") {
-        driver.onePassProcess(argv[2]);
+        driver.onePassProcess(argv[2], argv[3]);
     }
     else {
         std::cerr << "Argumento inválido. "
