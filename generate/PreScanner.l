@@ -1,30 +1,29 @@
 %{
+    #include "PreScanner.hpp"
+
     #include <string>
 
-    #include "PreScanner.hpp"
     #include "PreParser.hxx"
+
+    using token = sb::PreParser::token;
+
     #undef  YY_DECL
     #define YY_DECL int sb::PreScanner::yylex(\
                             sb::PreParser::semantic_type *const lval,\
                             sb::PreParser::location_type *loc)
-
-    using token = sb::PreParser::token;
-
     #define yyterminate() return( token::END )
-
     #define YY_NO_UNISTD_H
-
     #define YY_USER_ACTION loc->step(); loc->columns(yyleng);
 %}
 
+%option yyclass="sb::PreScanner"
 %option debug
 %option nodefault
-%option yyclass="sb::PreScanner"
 %option noyywrap
 %option c++
 
 %%
-%{ 
+%{
             yylval = lval;
 %}
 \n                    {

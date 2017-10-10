@@ -14,13 +14,13 @@ namespace sb{
         public:
             Driver() = default;
             virtual ~Driver() {};
-            void preProcess    (const std::string src, std::string dst);
-            void macroProcess  (const std::string src, std::string dst);
-            void onePassProcess(const std::string src, std::string dst);
+            void preProcess    (std::istream &srcStream, std::string dst);
+            void macroProcess  (std::istream &srcStream, std::string dst);
+            void onePassProcess(std::istream &srcStream, std::string dst);
 
             friend PreParser;
         private:
-            void preParse(std::istream &stream);
+            void writePreOutput(std::string dst);
             void insertEqu(std::string label, int value);
             void insertLine(int nLine, std::string line);
             void deleteLine(int nLine);
@@ -28,7 +28,6 @@ namespace sb{
 
             std::map<std::string, int> equMap;
             std::map<int, std::string> preMap;
-            const int preLen = 4;
     };
 }
 

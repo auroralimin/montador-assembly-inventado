@@ -15,7 +15,7 @@ namespace sb{
 
             PreScanner(std::istream *in) : yyFlexLexer(in) {};
             virtual ~PreScanner() {};
-            virtual int yylex(sb::PreParser::semantic_type * const lval, 
+            virtual int yylex(sb::PreParser::semantic_type * const lval,
                               sb::PreParser::location_type *location);
             int getLine();
 

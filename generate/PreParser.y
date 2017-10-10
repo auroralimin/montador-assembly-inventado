@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require  "3.0"
-%debug 
-%defines 
+%debug
+%defines
 %define api.namespace {sb}
 %define parser_class_name {PreParser}
 %define api.value.type variant
@@ -23,12 +23,12 @@
     #define yylex preScanner.yylex
 }
 
-%token               COLON 
+%token               COLON
 %token <std::string> NAME
 %token <int>         EQU_VAL
 %token <std::string> EQU_IF
 %token               ENDL
-%token               END 0 
+%token               END 0
 
 %type <std::string> line
 %type <std::string> label
@@ -72,7 +72,7 @@ command
           $$ = $1;
       }
     ;
-    
+
 equ
     : label EQU_VAL ENDL {
           driver.insertEqu($1, $2);
