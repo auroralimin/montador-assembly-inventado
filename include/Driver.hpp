@@ -30,6 +30,7 @@ namespace sb{
 
             friend PreParser;
         private:
+            bool hasSubstr(int nLine, std::string substr);
             void printError(int nLine, std::string begin,
                             std::string msg, errorType type);
             void writePreOutput(std::string dst);

@@ -31,19 +31,20 @@
     bool equif = true;
 }
 
+%token               ENDL
 %token               COLON
 %token               COMMA
-%token <std::string> NAME
-%token               EQU
-%token <int>         NUM
 %token               IF
-%token               ENDL
+%token               EQU
+%token <std::string> LABEL
+%token <std::string> INVALID
+%token <std::string> NAME
+%token <int>         NUM
 %token               END 0
 
-%type <std::string> name
 %type <std::string> line
-%type <std::string> label
 %type <std::string> command
+%type <std::string> name
 
 %locations
 
@@ -61,16 +62,16 @@ pre_processor
     ;
 
 line
-    : label end_line {
-          $$ = $1 + ": ";
+    : LABEL end_line {
+          $$ = $1;
           if (equif) {
               driver.insertLine(preScanner.getLine(), $$);
           } else {
               equif = true;
           }
       }
-    | label command end_line {
-          $$ = $1 + ": " + $2;
+    | LABEL command end_line {
+          $$ = $1 + " " + $2;
           if (equif) {
               driver.insertLine(preScanner.getLine(), $$);
               equif = true;
@@ -113,14 +114,37 @@ name
     | NAME COMMA {
           $$ = $1 + ",";
       }
+    | INVALID {
+          $$ = $1;
+          int nLine = preScanner.getLine();
+          if (!driver.hasSubstr(nLine, $1)) {
+              nLine++;
+          }
+          driver.printError(nLine, $$, "Token inválido: \"" + $$ + "\".",
+                            sb::errorType::lexical);
+      }
+    | INVALID COMMA {
+          $$ = $1 + ",";
+          int nLine = preScanner.getLine();
+          if (!driver.hasSubstr(nLine, $1)) {
+              nLine++;
+          }
+          driver.printError(nLine, $$, "Token inválido: \"" + $$ + "\".",
+                            sb::errorType::lexical);
+      }
+ 
     ;
 
 equ
-    : label EQU NUM end_line {
-          driver.insertEqu($1, $3);
+    : LABEL EQU NUM end_line {
+          std::string label($1);
+          label = label.substr(0, label.length() - 1);
+          driver.insertEqu(label, $3);
       }
-    | label end_line EQU NUM end_line {
-          driver.insertEqu($1, $4);
+    | LABEL end_line EQU NUM end_line {
+          std::string label($1);
+          label = label.substr(0, label.length() - 1);
+          driver.insertEqu(label, $4);
       }
     ;
 
@@ -149,12 +173,6 @@ if
                                 sb::errorType::warning);
           }
     }
-    ;
-
-label
-    : NAME COLON {
-          $$ = $1;
-      }
     ;
 
 end_line

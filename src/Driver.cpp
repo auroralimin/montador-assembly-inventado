@@ -41,6 +41,14 @@ void sb::Driver::onePassProcess(std::istream &srcStream,
     //TODO: Implementar o processamento em um passo
 }
 
+bool sb::Driver::hasSubstr(int nLine, std::string substr) {
+    std::ifstream f(src);
+    std::string line;
+    for (int i = 1; i <= nLine; i++) std::getline(f, line);
+
+    return (line.find(substr) != std::string::npos);
+}
+
 void sb::Driver::printError(int nLine, std::string begin, std::string msg,
                             sb::errorType type) {
     //TODO: Printar a linha corretamente
