@@ -3,6 +3,8 @@
 #include <cctype>
 #include <fstream>
 
+#include "MapException.hpp"
+
 #define UNUSED_VAR (void)
 
 void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
@@ -56,13 +58,12 @@ void sb::Driver::deleteLine(int nLine) {
     preMap.erase(it);
 }
 
-int sb::Driver::getEqu(std::string label, int nLine) {
+int sb::Driver::getEqu(std::string label) {
     std::map<std::string, int>::iterator it = equMap.find(label);
 
     if (it == equMap.end()) {
-        std::cerr << "Erro semantico (linha: "
-            << nLine << ") : IF para rótulo não declarado." << std::endl;
-        return EXIT_FAILURE;
+        MapException e;
+        throw e;
     }
 
     return it->second;

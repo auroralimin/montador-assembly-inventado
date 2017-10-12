@@ -24,7 +24,7 @@ namespace sb{
             void insertEqu(std::string label, int value);
             void insertLine(int nLine, std::string line);
             void deleteLine(int nLine);
-            int getEqu(std::string label, int nLine);
+            int getEqu(std::string label);
 
             std::map<std::string, int> equMap;
             std::map<int, std::string> preMap;

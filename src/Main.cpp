@@ -85,8 +85,8 @@ void checkStream(std::string file, std::ifstream &stream) {
 }
 
 std::string createOutName(std::string dst, std::string ext) {
-    const int preLen = ext.length();
-    if (dst.compare(dst.length() - preLen, preLen, ext)) dst = dst + ext;
+    const int eLen = ext.length(), dLen = dst.length();
+    if ((dLen < eLen) || (dst.compare(dLen - eLen, eLen, ext))) dst = dst + ext;
     return dst;
 }
 

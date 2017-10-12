@@ -18,18 +18,26 @@
 
 %code{
     #include "Driver.hpp"
+   
+    #include <exception>
+
+    #include "MapException.hpp"
 
     #undef yylex
     #define yylex preScanner.yylex
+
+    #define UNUSED_VAR (void)
 }
 
 %token               COLON
+%token               COMMA
 %token <std::string> NAME
 %token <int>         EQU_VAL
 %token <std::string> EQU_IF
 %token               ENDL
 %token               END 0
 
+%type <std::string> name
 %type <std::string> line
 %type <std::string> label
 %type <std::string> command
@@ -45,39 +53,56 @@ pre_processor
     | if
     | line pre_processor
     | line
-    | ENDL pre_processor
-    | ENDL
+    | end_line pre_processor
+    | end_line
     ;
 
 line
-    : label ENDL {
+    : label end_line {
           $$ = $1 + ": ";
           driver.insertLine(preScanner.getLine(), $$);
       }
-    | label command ENDL {
+    | label command end_line {
           $$ = $1 + ": " + $2;
           driver.insertLine(preScanner.getLine(), $$);
       }
-    | command ENDL {
+    | command end_line {
           $$ = $1;
           driver.insertLine(preScanner.getLine(), $$);
       }
     ;
 
 command
-    : NAME command {
-          $$ = $1 + " " + $2;
-     }
-    | NAME {
+    : name command {
+          try {
+              $$ = std::to_string(driver.getEqu($1)) + " " + $2;
+          } catch (std::exception &e) {
+              $$ = $1 + " " + $2;
+          }
+      }
+    | name {
+          try {
+              $$ = std::to_string(driver.getEqu($1));
+          } catch (std::exception &e) {
+              $$ = $1;
+          }
+      }
+    ;
+
+name
+    : NAME {
           $$ = $1;
+      }
+    | NAME COMMA {
+          $$ = $1 + ",";
       }
     ;
 
 equ
-    : label EQU_VAL ENDL {
+    : label EQU_VAL end_line {
           driver.insertEqu($1, $2);
       }
-    | label ENDL EQU_VAL ENDL {
+    | label end_line EQU_VAL ENDL {
           driver.insertEqu($1, $3);
       }
     ;
@@ -85,14 +110,24 @@ equ
 if
     : EQU_IF NAME line {
           int nLine = preScanner.getLine();
-          if (!driver.getEqu($2, nLine)) {
-              driver.deleteLine(nLine);
+          try {
+              if (driver.getEqu($2) <= 0) {
+                  driver.deleteLine(nLine);
+              }
+          } catch (sb::MapException &e) {
+              std::cerr << "Erro semântico na linha " << nLine - 1
+                        << ": IF para rótulo EQU não declarado." << std::endl;
           }
       }
-    | EQU_IF NAME ENDL line {
+    | EQU_IF NAME end_line line {
           int nLine = preScanner.getLine();
-          if (!driver.getEqu($2, nLine)) {
-              driver.deleteLine(nLine);
+          try {
+              if (driver.getEqu($2) <= 0) {
+                  driver.deleteLine(nLine);
+              }
+          } catch (sb::MapException &e) {
+              std::cerr << "Erro semântico na linha " << nLine - 1
+                        << ": IF para rótulo EQU não declarado." << std::endl;
           }
       }
     ;
@@ -103,9 +138,16 @@ label
       }
     ;
 
+end_line
+    : ENDL end_line
+    | ENDL
+    ;
+
 %%
 
 void sb::PreParser::error(const location_type &l, const std::string &errMsg) {
-   std::cerr << "Erro na linha " << l << ": " << errMsg << std::endl;
+    UNUSED_VAR l;
+    std::cerr << "Erro na linha " << preScanner.getLine() << ": " 
+              << errMsg << std::endl;
 }
 

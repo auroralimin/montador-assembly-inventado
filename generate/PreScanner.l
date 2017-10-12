@@ -21,35 +21,41 @@
 %option nodefault
 %option noyywrap
 %option c++
+%option caseless
 
 %%
 %{
             yylval = lval;
 %}
-\n                    {
-                      nLine++;
-                      return token::ENDL;
-                      }
-:                     {
-                      return token::COLON;
-                      }
-IF                    {
-                      return token::EQU_IF;
-                      }
-[a-zA-Z]+[a-zA-Z0-9]* {
-                      yylval->build<std::string>(yytext);
-                      return token::NAME;
-                      }
-EQU[ \t][0-1]         {
-                      std::string matchedText(yytext);
-                      int len = matchedText.length();
-                      std::string value = matchedText.substr(len-1, len);
-                      yylval->build<int>(stoi(value));
-                      return token::EQU_VAL;
-                      }
-;.+                   ;
-[ \t]                 ;
-.                     ;
+\n                {
+                  nLine++;
+                  return token::ENDL;
+                  }
+:                 {
+                  return token::COLON;
+                  }
+,                 {
+                  return token::COMMA;
+                  }
+IF                {
+                  return token::EQU_IF;
+                  }
+[a-z_]+[a-z0-9_]* {
+                  std::string name(yytext);
+                  transform(name.begin(), name.end(), name.begin(), ::toupper);
+                  yylval->build<std::string>(name);
+                  return token::NAME;
+                  }
+EQU[ \t][0-9]+    {
+                  std::string matchedText(yytext);
+                  int len = matchedText.length();
+                  std::string value = matchedText.substr(len-1, len);
+                  yylval->build<int>(stoi(value));
+                  return token::EQU_VAL;
+                  }
+;.*               ;
+[ \t]+            ;
+.                 ;
 %%
 
 int sb::PreScanner::getLine() {
