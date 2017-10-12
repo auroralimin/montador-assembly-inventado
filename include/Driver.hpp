@@ -10,22 +10,34 @@
 #include "PreParser.hxx"
 
 namespace sb{
+    enum errorType {
+        lexical,
+        sintatic,
+        semantic
+    };
+
     class Driver{
         public:
             Driver() = default;
             virtual ~Driver() {};
-            void preProcess    (std::istream &srcStream, std::string dst);
-            void macroProcess  (std::istream &srcStream, std::string dst);
-            void onePassProcess(std::istream &srcStream, std::string dst);
+            void preProcess    (std::istream &srcStream,
+                                std::string src, std::string dst);
+            void macroProcess  (std::istream &srcStream,
+                                std::string src, std::string dst);
+            void onePassProcess(std::istream &srcStream,
+                                std::string src, std::string dst);
 
             friend PreParser;
         private:
+            void printError(int row, int col, std::string msg, std::string line,
+                            errorType type);
             void writePreOutput(std::string dst);
             void insertEqu(std::string label, int value);
             void insertLine(int nLine, std::string line);
             void deleteLine(int nLine);
             int getEqu(std::string label);
 
+            std::string src;
             std::map<std::string, int> equMap;
             std::map<int, std::string> preMap;
     };

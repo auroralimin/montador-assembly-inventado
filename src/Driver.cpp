@@ -7,7 +7,9 @@
 
 #define UNUSED_VAR (void)
 
-void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
+void sb::Driver::preProcess(std::istream &srcStream,
+                            std::string src, std::string dst) {
+    this->src = src;
     sb::PreScanner *preScanner = new sb::PreScanner(&srcStream);
     sb::PreParser *preParser = new sb::PreParser(*preScanner, *this);
 
@@ -22,16 +24,47 @@ void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
     return;
 }
 
-void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
+void sb::Driver::macroProcess(std::istream &srcStream,
+                              std::string src, std::string dst) {
     UNUSED_VAR srcStream;
+    UNUSED_VAR src;
     UNUSED_VAR dst;
     //TODO: Implementar pre-processamento de macro
 }
 
-void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
+void sb::Driver::onePassProcess(std::istream &srcStream,
+                                std::string src, std::string dst) {
     UNUSED_VAR srcStream;
+    UNUSED_VAR src;
     UNUSED_VAR dst;
     //TODO: Implementar o processamento em um passo
+}
+
+void sb::Driver::printError(int row, int col, std::string msg,
+                            std::string line, sb::errorType type) {
+    //TODO: Printar a linha corretamente
+    const std::string bold   ("\e[1m");
+    const std::string red    ("\033[1;31m");
+    const std::string green  ("\033[1;32m");
+    const std::string off    ("\e[0m");
+    std::cout << bold << src << "." << row << ":" << col << ":" << off;
+    switch (type) {
+        case sb::errorType::lexical:
+            std::cout << red << " Erro léxico: " << off;
+            break;
+        case sb::errorType::sintatic:
+            std::cout << red << " Erro sintático: " << off;
+            break;
+        case sb::errorType::semantic:
+            std::cout << red << " Erro semântico: " << off;
+            break;
+    }
+    std::cout << bold << msg << off << std::endl;
+    std::cout << "    " << line << std::endl;
+    std::cout << "    " << green;
+    for (int i = 0; i < col - 1; i++)
+        std::cout << "~";
+    std::cout << "^" << std::endl;
 }
 
 void sb::Driver::writePreOutput(std::string dst) {

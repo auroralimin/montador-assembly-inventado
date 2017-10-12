@@ -4,7 +4,11 @@
 
 #include "Driver.hpp"
 
-enum PType {pre, mcr, o};
+enum PType {
+    pre,
+    mcr,
+    o
+};
 
 std::string process(const char *src, std::string dst, const PType pType);
 void checkStream(std::string srcFile, std::ifstream &stream);
@@ -59,17 +63,17 @@ std::string process(const char *src, std::string dst, const PType pType) {
 
     switch (pType) {
         case pre:
-            driver.preProcess(stream, dst);
+            driver.preProcess(stream, src, dst);
             break;
         case mcr:
             std::cout << "Macro src = " << src
                       << ", Macro dst = " << dst << std::endl;
-            driver.macroProcess(stream, dst);
+            driver.macroProcess(stream, src, dst);
             break;
         case o:
             std::cout << "OnePass src = " << src
                       << ", OnePass dst = " << dst << std::endl;
-            driver.onePassProcess(stream, dst);
+            driver.onePassProcess(stream, src, dst);
             break;
     }
 

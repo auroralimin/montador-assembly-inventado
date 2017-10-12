@@ -6,7 +6,7 @@
     #include "PreParser.hxx"
 
     using token = sb::PreParser::token;
-
+    int yycolumn = 1;
     #undef  YY_DECL
     #define YY_DECL int sb::PreScanner::yylex(\
                             sb::PreParser::semantic_type *const lval,\
@@ -18,6 +18,7 @@
 
 %option yyclass="sb::PreScanner"
 %option debug
+%option yylineno
 %option nodefault
 %option noyywrap
 %option c++
@@ -25,7 +26,7 @@
 
 %%
 %{
-            yylval = lval;
+                  yylval = lval;
 %}
 \n                {
                   nLine++;

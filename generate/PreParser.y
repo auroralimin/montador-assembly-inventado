@@ -115,8 +115,10 @@ if
                   driver.deleteLine(nLine);
               }
           } catch (sb::MapException &e) {
-              std::cerr << "Erro semântico na linha " << nLine - 1
-                        << ": IF para rótulo EQU não declarado." << std::endl;
+              driver.printError(nLine - 1, 4,
+                                "IF para rótulo EQU não declarado.",
+                                "IF " + $2,
+                                sb::errorType::semantic);
           }
       }
     | EQU_IF NAME end_line line {
@@ -126,8 +128,10 @@ if
                   driver.deleteLine(nLine);
               }
           } catch (sb::MapException &e) {
-              std::cerr << "Erro semântico na linha " << nLine - 1
-                        << ": IF para rótulo EQU não declarado." << std::endl;
+              driver.printError(nLine - 1, 4,
+                                "IF para rótulo EQU não declarado.",
+                                "IF " + $2,
+                                sb::errorType::semantic);
           }
       }
     ;
@@ -147,7 +151,7 @@ end_line
 
 void sb::PreParser::error(const location_type &l, const std::string &errMsg) {
     UNUSED_VAR l;
-    std::cerr << "Erro na linha " << preScanner.getLine() << ": " 
+    std::cerr << "Erro na linha " << preScanner.getLine() + 1 << ": " 
               << errMsg << std::endl;
 }
 
