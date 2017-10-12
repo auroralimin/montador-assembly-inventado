@@ -39,7 +39,10 @@
                   return token::COMMA;
                   }
 IF                {
-                  return token::EQU_IF;
+                  return token::IF;
+                  }
+EQU               {
+                  return token::EQU;
                   }
 [a-z_]+[a-z0-9_]* {
                   std::string name(yytext);
@@ -47,15 +50,12 @@ IF                {
                   yylval->build<std::string>(name);
                   return token::NAME;
                   }
-EQU[ \t][0-9]+    {
-                  std::string matchedText(yytext);
-                  int len = matchedText.length();
-                  std::string value = matchedText.substr(len-1, len);
-                  yylval->build<int>(stoi(value));
-                  return token::EQU_VAL;
+[0-9]+            {
+                  yylval->build<int>(atoi(yytext));
+                  return token::NUM;
                   }
 ;.*               ;
-[ \t]+            ;
+[ \t]             ;
 .                 ;
 %%
 

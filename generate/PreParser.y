@@ -27,13 +27,16 @@
     #define yylex preScanner.yylex
 
     #define UNUSED_VAR (void)
+
+    bool equif = true;
 }
 
 %token               COLON
 %token               COMMA
 %token <std::string> NAME
-%token <int>         EQU_VAL
-%token <std::string> EQU_IF
+%token               EQU
+%token <int>         NUM
+%token               IF
 %token               ENDL
 %token               END 0
 
@@ -47,11 +50,11 @@
 %%
 
 pre_processor
-    : equ  pre_processor
+    : equ      pre_processor
     | equ
-    | if   pre_processor
+    | if       pre_processor
     | if
-    | line pre_processor
+    | line     pre_processor
     | line
     | end_line pre_processor
     | end_line
@@ -60,15 +63,29 @@ pre_processor
 line
     : label end_line {
           $$ = $1 + ": ";
-          driver.insertLine(preScanner.getLine(), $$);
+          if (equif) {
+              driver.insertLine(preScanner.getLine(), $$);
+          } else {
+              equif = true;
+          }
       }
     | label command end_line {
           $$ = $1 + ": " + $2;
-          driver.insertLine(preScanner.getLine(), $$);
+          if (equif) {
+              driver.insertLine(preScanner.getLine(), $$);
+              equif = true;
+          } else {
+              equif = true;
+          }
       }
     | command end_line {
           $$ = $1;
-          driver.insertLine(preScanner.getLine(), $$);
+          if (equif) {
+              driver.insertLine(preScanner.getLine(), $$);
+              equif = true;
+          } else {
+              equif = true;
+          }
       }
     ;
 
@@ -99,41 +116,39 @@ name
     ;
 
 equ
-    : label EQU_VAL end_line {
-          driver.insertEqu($1, $2);
-      }
-    | label end_line EQU_VAL ENDL {
+    : label EQU NUM end_line {
           driver.insertEqu($1, $3);
+      }
+    | label end_line EQU NUM end_line {
+          driver.insertEqu($1, $4);
       }
     ;
 
 if
-    : EQU_IF NAME line {
+    : IF NAME line {
           int nLine = preScanner.getLine();
           try {
               if (driver.getEqu($2) <= 0) {
-                  driver.deleteLine(nLine);
+                  equif = false;
               }
           } catch (sb::MapException &e) {
-              driver.printError(nLine - 1, 4,
+              driver.printError(nLine, $2,
                                 "IF para rótulo EQU não declarado.",
-                                "IF " + $2,
-                                sb::errorType::semantic);
+                                sb::errorType::warning);
           }
       }
-    | EQU_IF NAME end_line line {
+    | IF NAME {
           int nLine = preScanner.getLine();
           try {
               if (driver.getEqu($2) <= 0) {
-                  driver.deleteLine(nLine);
+                  equif = false;
               }
           } catch (sb::MapException &e) {
-              driver.printError(nLine - 1, 4,
+              driver.printError(nLine, $2,
                                 "IF para rótulo EQU não declarado.",
-                                "IF " + $2,
-                                sb::errorType::semantic);
+                                sb::errorType::warning);
           }
-      }
+    }
     ;
 
 label

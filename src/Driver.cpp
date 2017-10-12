@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <fstream>
+#include <iostream>
 
 #include "MapException.hpp"
 
@@ -40,14 +41,22 @@ void sb::Driver::onePassProcess(std::istream &srcStream,
     //TODO: Implementar o processamento em um passo
 }
 
-void sb::Driver::printError(int row, int col, std::string msg,
-                            std::string line, sb::errorType type) {
+void sb::Driver::printError(int nLine, std::string begin, std::string msg,
+                            sb::errorType type) {
     //TODO: Printar a linha corretamente
     const std::string bold   ("\e[1m");
     const std::string red    ("\033[1;31m");
     const std::string green  ("\033[1;32m");
+    const std::string purple ("\033[1;35m");
     const std::string off    ("\e[0m");
-    std::cout << bold << src << "." << row << ":" << col << ":" << off;
+
+    std::ifstream f(src);
+    std::string line;
+    for (int i = 1; i <= nLine; i++) std::getline(f, line);
+
+    std::size_t col = line.find(begin);
+
+    std::cout << bold << src << ":" << nLine << ":" << col + 1 << ":" << off;
     switch (type) {
         case sb::errorType::lexical:
             std::cout << red << " Erro léxico: " << off;
@@ -58,13 +67,16 @@ void sb::Driver::printError(int row, int col, std::string msg,
         case sb::errorType::semantic:
             std::cout << red << " Erro semântico: " << off;
             break;
+        case sb::errorType::warning:
+            std::cout << purple << " Aviso: " << off;
+            break;
     }
     std::cout << bold << msg << off << std::endl;
-    std::cout << "    " << line << std::endl;
-    std::cout << "    " << green;
-    for (int i = 0; i < col - 1; i++)
+
+    std::cout << line << std::endl << green;
+    for (unsigned long i = 0; i < col; i++)
         std::cout << "~";
-    std::cout << "^" << std::endl;
+    std::cout << "^" << std::endl << off;
 }
 
 void sb::Driver::writePreOutput(std::string dst) {

@@ -13,7 +13,8 @@ namespace sb{
     enum errorType {
         lexical,
         sintatic,
-        semantic
+        semantic,
+        warning
     };
 
     class Driver{
@@ -29,8 +30,8 @@ namespace sb{
 
             friend PreParser;
         private:
-            void printError(int row, int col, std::string msg, std::string line,
-                            errorType type);
+            void printError(int nLine, std::string begin,
+                            std::string msg, errorType type);
             void writePreOutput(std::string dst);
             void insertEqu(std::string label, int value);
             void insertLine(int nLine, std::string line);
