@@ -32,10 +32,10 @@
 }
 
 %token               ENDL
-%token               COLON
 %token               COMMA
 %token               IF
 %token               EQU
+%token               CONST
 %token <std::string> LABEL
 %token <std::string> INVALID
 %token <std::string> NAME
@@ -98,6 +98,12 @@ command
               $$ = $1 + " " + $2;
           }
       }
+    | CONST NUM {
+          $$ = "CONST " + std::to_string($2);
+      }
+    | CONST name {
+          $$ = "CONST " + $2;
+      }
     | name {
           try {
               $$ = std::to_string(driver.getEqu($1));
@@ -109,6 +115,8 @@ command
 
 name
     : NAME {
+          //TODO: Para todos os names, verificar se é uma label de um EQU e
+          // se for expandir
           $$ = $1;
       }
     | NAME COMMA {
@@ -152,7 +160,7 @@ if
     : IF NAME line {
           int nLine = preScanner.getLine();
           try {
-              if (driver.getEqu($2) <= 0) {
+              if (driver.getEqu($2) == 0) {
                   equif = false;
               }
           } catch (sb::MapException &e) {
@@ -164,7 +172,7 @@ if
     | IF NAME {
           int nLine = preScanner.getLine();
           try {
-              if (driver.getEqu($2) <= 0) {
+              if (driver.getEqu($2) == 0) {
                   equif = false;
               }
           } catch (sb::MapException &e) {

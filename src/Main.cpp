@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     const int asmLen = 4;
 
     if (src.compare(src.length() - asmLen, asmLen, ".asm")) {
-        std::cerr << "Arquivo de entrada deve ser do tipo asm." << std::endl;
+        std::cerr << "Arquivo de entrada inválido." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
 }
 
 std::string process(const char *src, std::string dst, const PType pType) {
+    //Instancias driver só uma vez
     sb::Driver driver;
     std::string ext[3] = {".pre", ".mcr", ".o"};
     dst = createOutName(dst, ext[pType]);

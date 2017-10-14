@@ -20,6 +20,7 @@ namespace sb{
             int getLine();
 
         private:
+            int processInvalidToken();
             sb::PreParser::semantic_type *yylval = nullptr;
             int nLine = 0;
     };

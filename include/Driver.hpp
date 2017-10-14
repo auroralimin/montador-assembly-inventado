@@ -9,6 +9,8 @@
 #include "PreScanner.hpp"
 #include "PreParser.hxx"
 
+#define DEBUG true
+
 namespace sb{
     enum errorType {
         lexical,
@@ -19,6 +21,7 @@ namespace sb{
 
     class Driver{
         public:
+            //Passar para o construtor src
             Driver() = default;
             virtual ~Driver() {};
             void preProcess    (std::istream &srcStream,
