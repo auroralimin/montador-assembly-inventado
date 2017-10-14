@@ -10,7 +10,8 @@ enum PType {
     o
 };
 
-std::string process(const char *src, std::string dst, const PType pType);
+std::string process(sb::Driver *driver, const char *src,
+                    std::string dst, PType pType);
 void checkStream(std::string srcFile, std::ifstream &stream);
 std::string createOutName(std::string dst, std::string ext);
 
@@ -30,33 +31,34 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-
+    sb::Driver *driver = new sb::Driver(argv[2]);
     if (flag == "-p") {
-        process(argv[2], dst, PType::pre);
+        process(driver, argv[2], dst, PType::pre);
     }
     else if (flag == "-m") {
-        std::string pre = process(argv[2], dst, PType::pre);
-        process(pre.c_str(), dst, PType::mcr);
+        std::string pre = process(driver, argv[2], dst, PType::pre);
+        process(driver, pre.c_str(), dst, PType::mcr);
     }
     else if (flag == "-o") {
-        std::string pre = process(argv[2], dst, PType::pre);
-        std::string mcr = process(pre.c_str(), dst, PType::mcr);
-        process(mcr.c_str(), dst, PType::o);
+        std::string pre = process(driver, argv[2], dst, PType::pre);
+        std::string mcr = process(driver, pre.c_str(), dst, PType::mcr);
+        process(driver, mcr.c_str(), dst, PType::o);
     }
     else {
+        delete driver;
         std::cerr << "Argumento inválido. "
                      "Utilize -p para pré processamento,"
                      "-m para expansão de macros e "
                      "-o para montagem completa." << std::endl;
         return EXIT_FAILURE;
     }
+    delete driver;
 
     return EXIT_SUCCESS;
 }
 
-std::string process(const char *src, std::string dst, const PType pType) {
-    //Instancias driver só uma vez
-    sb::Driver driver;
+std::string process(sb::Driver *driver, const char *src,
+                    std::string dst, PType pType) {
     std::string ext[3] = {".pre", ".mcr", ".o"};
     dst = createOutName(dst, ext[pType]);
     std::ifstream stream(src);
@@ -64,17 +66,21 @@ std::string process(const char *src, std::string dst, const PType pType) {
 
     switch (pType) {
         case pre:
-            driver.preProcess(stream, src, dst);
+            driver->preProcess(stream, dst);
             break;
         case mcr:
-            std::cout << "Macro src = " << src
-                      << ", Macro dst = " << dst << std::endl;
-            driver.macroProcess(stream, src, dst);
+            if (DEBUG) {
+                std::cout << "Macro src = " << src
+                          << ", Macro dst = " << dst << std::endl;
+            }
+            driver->macroProcess(stream, dst);
             break;
         case o:
-            std::cout << "OnePass src = " << src
-                      << ", OnePass dst = " << dst << std::endl;
-            driver.onePassProcess(stream, src, dst);
+            if (DEBUG) {
+                std::cout << "OnePass src = " << src
+                          << ", OnePass dst = " << dst << std::endl;
+            }
+            driver->onePassProcess(stream, dst);
             break;
     }
 

@@ -8,9 +8,13 @@
 
 #define UNUSED_VAR (void)
 
-void sb::Driver::preProcess(std::istream &srcStream,
-                            std::string src, std::string dst) {
-    this->src = src;
+#define BOLD      "\e[1m"
+#define OFF       "\e[0m"
+#define COLOR(id) "\033[1;3" + std::to_string(id) + "m"
+
+sb::Driver::Driver(std::string src) : src(src) {}
+
+void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
     sb::PreScanner *preScanner = new sb::PreScanner(&srcStream);
     sb::PreParser *preParser = new sb::PreParser(*preScanner, *this);
 
@@ -25,18 +29,14 @@ void sb::Driver::preProcess(std::istream &srcStream,
     return;
 }
 
-void sb::Driver::macroProcess(std::istream &srcStream,
-                              std::string src, std::string dst) {
+void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
     UNUSED_VAR srcStream;
-    UNUSED_VAR src;
     UNUSED_VAR dst;
     //TODO: Implementar pre-processamento de macro
 }
 
-void sb::Driver::onePassProcess(std::istream &srcStream,
-                                std::string src, std::string dst) {
+void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
     UNUSED_VAR srcStream;
-    UNUSED_VAR src;
     UNUSED_VAR dst;
     //TODO: Implementar o processamento em um passo
 }
@@ -51,12 +51,9 @@ bool sb::Driver::hasSubstr(int nLine, std::string substr) {
 
 void sb::Driver::printError(int nLine, std::string begin, std::string msg,
                             sb::errorType type) {
-    //TODO: Printar a linha corretamente
-    const std::string bold   ("\e[1m");
-    const std::string red    ("\033[1;31m");
-    const std::string green  ("\033[1;32m");
-    const std::string purple ("\033[1;35m");
-    const std::string off    ("\e[0m");
+    const std::string red    = COLOR(sb::color::red);
+    const std::string green  = COLOR(sb::color::green);
+    const std::string purple = COLOR(sb::color::purple);
 
     std::ifstream f(src);
     std::string line;
@@ -64,34 +61,34 @@ void sb::Driver::printError(int nLine, std::string begin, std::string msg,
 
     std::size_t col = line.find(begin);
 
-    std::cout << bold << src << ":" << nLine << ":" << col + 1 << ":" << off;
+    std::cout << BOLD << src << ":" << nLine << ":" << col + 1 << ":" << OFF;
     switch (type) {
         case sb::errorType::lexical:
-            std::cout << red << " Erro léxico: " << off;
+            std::cout << red << " Erro léxico: " << OFF;
             break;
         case sb::errorType::sintatic:
-            std::cout << red << " Erro sintático: " << off;
+            std::cout << red << " Erro sintático: " << OFF;
             break;
         case sb::errorType::semantic:
-            std::cout << red << " Erro semântico: " << off;
+            std::cout << red << " Erro semântico: " << OFF;
             break;
         case sb::errorType::warning:
-            std::cout << purple << " Aviso: " << off;
+            std::cout << purple << " Aviso: " << OFF;
             break;
     }
-    std::cout << bold << msg << off << std::endl;
+    std::cout << BOLD << msg << OFF << std::endl;
 
     std::cout << line << std::endl << green;
     for (unsigned long i = 0; i < col; i++)
         std::cout << "~";
-    std::cout << "^" << std::endl << off;
+    std::cout << "^" << std::endl << OFF;
 }
 
 void sb::Driver::writePreOutput(std::string dst) {
     std::ofstream output;
     output.open(dst);
     for (auto line : preMap) {
-        output << line.second << std::endl;
+            output << line.second << std::endl;
     }
     output.close();
 }

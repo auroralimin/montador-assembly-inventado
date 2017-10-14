@@ -115,30 +115,41 @@ command
 
 name
     : NAME {
-          //TODO: Para todos os names, verificar se é uma label de um EQU e
-          // se for expandir
-          $$ = $1;
+          try {
+              $$ = std::to_string(driver.getEqu($1));
+          } catch (sb::MapException &e) {
+              $$ = $1;
+          }
+
       }
     | NAME COMMA {
-          $$ = $1 + ",";
+          try {
+              $$ = std::to_string(driver.getEqu($1)) + ",";
+          } catch (sb::MapException &e) {
+              $$ = $1 + ",";
+          }
       }
     | INVALID {
-          $$ = $1;
           int nLine = preScanner.getLine();
-          if (!driver.hasSubstr(nLine, $1)) {
-              nLine++;
-          }
-          driver.printError(nLine, $$, "Token inválido: \"" + $$ + "\".",
+          nLine = driver.hasSubstr(nLine, $1) ? nLine : nLine + 1;
+          driver.printError(nLine, $1, "Token inválido: \"" + $1 + "\".",
                             sb::errorType::lexical);
+          try {
+              $$ = std::to_string(driver.getEqu($1));
+          } catch (sb::MapException &e) {
+              $$ = $1;
+          }
       }
     | INVALID COMMA {
-          $$ = $1 + ",";
           int nLine = preScanner.getLine();
-          if (!driver.hasSubstr(nLine, $1)) {
-              nLine++;
-          }
-          driver.printError(nLine, $$, "Token inválido: \"" + $$ + "\".",
+          nLine = driver.hasSubstr(nLine, $1) ? nLine : nLine + 1;
+          driver.printError(nLine, $1, "Token inválido: \"" + $1 + "\".",
                             sb::errorType::lexical);
+          try {
+              $$ = std::to_string(driver.getEqu($1)) + ",";
+          } catch (sb::MapException &e) {
+              $$ = $1 + ",";
+          }
       }
  
     ;
@@ -160,24 +171,18 @@ if
     : IF NAME line {
           int nLine = preScanner.getLine();
           try {
-              if (driver.getEqu($2) == 0) {
-                  equif = false;
-              }
+              equif = driver.getEqu($2) ? true : false;
           } catch (sb::MapException &e) {
-              driver.printError(nLine, $2,
-                                "IF para rótulo EQU não declarado.",
+              driver.printError(nLine, $2, "IF para rótulo EQU não declarado.",
                                 sb::errorType::warning);
           }
       }
     | IF NAME {
           int nLine = preScanner.getLine();
           try {
-              if (driver.getEqu($2) == 0) {
-                  equif = false;
-              }
+              equif = driver.getEqu($2) ? true : false;
           } catch (sb::MapException &e) {
-              driver.printError(nLine, $2,
-                                "IF para rótulo EQU não declarado.",
+              driver.printError(nLine, $2, "IF para rótulo EQU não declarado.",
                                 sb::errorType::warning);
           }
     }

@@ -9,7 +9,7 @@
 #include "PreScanner.hpp"
 #include "PreParser.hxx"
 
-#define DEBUG true
+#define DEBUG false
 
 namespace sb{
     enum errorType {
@@ -19,17 +19,19 @@ namespace sb{
         warning
     };
 
+    enum color {
+        red = 1,
+        green = 2,
+        purple = 5
+    };
+
     class Driver{
         public:
-            //Passar para o construtor src
-            Driver() = default;
+            Driver(std::string src);
             virtual ~Driver() {};
-            void preProcess    (std::istream &srcStream,
-                                std::string src, std::string dst);
-            void macroProcess  (std::istream &srcStream,
-                                std::string src, std::string dst);
-            void onePassProcess(std::istream &srcStream,
-                                std::string src, std::string dst);
+            void preProcess    (std::istream &srcStream, std::string dst);
+            void macroProcess  (std::istream &srcStream, std::string dst);
+            void onePassProcess(std::istream &srcStream, std::string dst);
 
             friend PreParser;
         private:
