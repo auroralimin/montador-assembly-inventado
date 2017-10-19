@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "Error.hpp"
+#include "OutFormat.hpp"
 #include "MapException.hpp"
 
 #define UNUSED_VAR (void)
@@ -23,8 +25,9 @@ void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
 }
 
 void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
+    Error *error = new Error(src);
     sb::Scanner *scanner = new sb::Scanner(&srcStream);
-    sb::Parser *parser = new sb::Parser(*scanner, *this);
+    sb::Parser *parser = new sb::Parser(*scanner, *this, error);
 
     addr = 0;
     const int accept(0);
@@ -34,14 +37,7 @@ void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
     }
 
     solveRef();
-
-    std::ofstream out;
-    out.open(dst);
-    for (auto n : assembly) {
-        out << n << " ";
-    }
-    out << std::endl;
-    out.close();
+    if (!error->getErrorFlag()) writeBin(dst);
 }
 
 bool sb::Driver::hasSubstr(int nLine, std::string substr) {
@@ -51,41 +47,16 @@ bool sb::Driver::hasSubstr(int nLine, std::string substr) {
 
     return (line.find(substr) != std::string::npos);
 }
-
-void sb::Driver::printError(int nLine, std::string begin, std::string msg,
-                            sb::errorType type) {
-    const std::string red     = COLOR(sb::color::red);
-    const std::string green   = COLOR(sb::color::green);
-    const std::string magenta = COLOR(sb::color::magenta);
-
-    std::ifstream f(src);
-    std::string line;
-    for (int i = 1; i <= nLine; i++) std::getline(f, line);
-
-    std::size_t col = line.find(begin);
-
-    std::cout << BOLD << src << ":" << nLine << ":" << col + 1 << ":" << OFF;
-    switch (type) {
-        case sb::errorType::lexical:
-            std::cout << red << " Erro léxico: " << OFF;
-            break;
-        case sb::errorType::sintatic:
-            std::cout << red << " Erro sintático: " << OFF;
-            break;
-        case sb::errorType::semantic:
-            std::cout << red << " Erro semântico: " << OFF;
-            break;
-        case sb::errorType::warning:
-            std::cout << magenta << " Aviso: " << OFF;
-            break;
+void sb::Driver::writeBin(std::string dst) {
+    std::ofstream out;
+    out.open(dst);
+    for (auto n : assembly) {
+        out << n << " ";
     }
-    std::cout << BOLD << msg << OFF << std::endl;
-
-    std::cout << line << std::endl << green;
-    for (unsigned long i = 0; i < col; i++)
-        std::cout << "~";
-    std::cout << "^" << std::endl << OFF;
+    out << std::endl;
+    out.close();
 }
+
 
 void sb::Driver::insertRef(std::string label) {
     if (DEBUG) {
@@ -120,3 +91,4 @@ void sb::Driver::solveRef() {
         }
     }
 }
+

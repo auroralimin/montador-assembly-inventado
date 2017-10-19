@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "Driver.hpp"
+#include "OutFormat.hpp"
 
 enum PType {
     pre,

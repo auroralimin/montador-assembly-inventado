@@ -4,6 +4,7 @@
     #include <string>
 
     #include "Driver.hpp"
+    #include "OutFormat.hpp"
     #include "Parser.hxx"
 
     using token = sb::Parser::token;
@@ -13,8 +14,7 @@
     #define YY_DECL int sb::Scanner::yylex(\
                             sb::Parser::semantic_type *const lval,\
                             sb::Parser::location_type *location)
-    #define yyterminate()   static int once = 0;\
-                            return once++ ? token::ENDL : token::END;
+    #define yyterminate() return token::END
     #define YY_NO_UNISTD_H
     #define YY_USER_ACTION location->step(); location->columns(yyleng);
 %}
@@ -45,6 +45,20 @@
         std::cout << blue << "Scanner: " << OFF << "COMMA token" << std::endl;
     }
     return token::COMMA;
+}
+TEXT {
+    if (DEBUG) {
+        const std::string blue = COLOR(sb::color::blue);
+        std::cout << blue << "Scanner: " << OFF << "TEXT token" << std::endl;
+    }
+    return token::TEXT;
+}
+DATA {
+    if (DEBUG) {
+        const std::string blue = COLOR(sb::color::blue);
+        std::cout << blue << "Scanner: " << OFF << "DATA token" << std::endl;
+    }
+    return token::DATA;
 }
 ADD {
     if (DEBUG) {
