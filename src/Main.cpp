@@ -24,12 +24,13 @@ int main(int argc, char **argv) {
     }
 
     std::string flag(argv[1]), src(argv[2]), dst(argv[3]);
+    /* TODO: Integrar fases do montador para incluir o if abaixo
     const int asmLen = 4;
-
     if (src.compare(src.length() - asmLen, asmLen, ".asm")) {
         std::cerr << "Arquivo de entrada inválido." << std::endl;
         exit(EXIT_FAILURE);
     }
+    */
 
     sb::Driver *driver = new sb::Driver(argv[2]);
     if (flag == "-p") {
@@ -40,9 +41,12 @@ int main(int argc, char **argv) {
         process(driver, pre.c_str(), dst, PType::mcr);
     }
     else if (flag == "-o") {
+        /* TODO: Integrar as fases de pré-processamento e macro
         std::string pre = process(driver, argv[2], dst, PType::pre);
         std::string mcr = process(driver, pre.c_str(), dst, PType::mcr);
         process(driver, mcr.c_str(), dst, PType::o);
+        */
+        process(driver, argv[2], dst, PType::o);
     }
     else {
         delete driver;
@@ -61,6 +65,13 @@ std::string process(sb::Driver *driver, const char *src,
                     std::string dst, PType pType) {
     std::string ext[3] = {".pre", ".mcr", ".o"};
     dst = createOutName(dst, ext[pType]);
+
+    //Coloca endl no final do arquivo de entrada para evitar problemas
+    std::ofstream oFile;
+    oFile.open(src, std::ios_base::app);
+    oFile << std::endl;
+    oFile.close();
+
     std::ifstream stream(src);
     checkStream(src, stream);
 

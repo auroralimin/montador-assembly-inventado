@@ -27,8 +27,8 @@ OBJ_FILES += $(addprefix $(BIN_PATH)/,$(notdir $(CXX_FILES:.cxx=.o)))
 DEP_FILES = $(wildcard $(DEP_PATH)/*.d)
 
 # Nome dos arquivos Flex e Bison
-PRE_SCANNER = PreScanner.l
-PRE_PARSER = PreParser.y
+SCANNER = Scanner.l
+PARSER = Parser.y
 
 # Nome do executável final
 # MODIFIQUE AQUI NOMEANDO COM SEU NOME E MATRÍCULA
@@ -68,8 +68,8 @@ clean:
 
 # Gera o código do scanner e do parser e coloca-os nas pastas corretas
 generate:
-	bison -o $(PRE_PARSER:.y=.cxx) $(GEN_PATH)/$(PRE_PARSER)
-	flex -o $(PRE_SCANNER:.l=.cxx) $(GEN_PATH)/$(PRE_SCANNER)
+	bison -o $(PARSER:.y=.cxx) $(GEN_PATH)/$(PARSER)
+	flex -o $(SCANNER:.l=.cxx) $(GEN_PATH)/$(SCANNER)
 	mv *.cxx $(SRC_PATH)/
 	mv *.hxx *.hh $(INC_PATH)/
 

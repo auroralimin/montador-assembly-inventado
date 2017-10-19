@@ -8,25 +8,12 @@
 
 #define UNUSED_VAR (void)
 
-#define BOLD      "\e[1m"
-#define OFF       "\e[0m"
-#define COLOR(id) "\033[1;3" + std::to_string(id) + "m"
-
 sb::Driver::Driver(std::string src) : src(src) {}
 
 void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
-    sb::PreScanner *preScanner = new sb::PreScanner(&srcStream);
-    sb::PreParser *preParser = new sb::PreParser(*preScanner, *this);
-
-    const int accept(0);
-    if (preParser->parse() != accept) {
-        std::cerr << "Erro imprevisto no pré-processamento." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    writePreOutput(dst);
-
-    return;
+    UNUSED_VAR srcStream;
+    UNUSED_VAR dst;
+    //TODO: Integrar o pré-processamento
 }
 
 void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
@@ -36,9 +23,25 @@ void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
 }
 
 void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
-    UNUSED_VAR srcStream;
-    UNUSED_VAR dst;
-    //TODO: Implementar o processamento em um passo
+    sb::Scanner *scanner = new sb::Scanner(&srcStream);
+    sb::Parser *parser = new sb::Parser(*scanner, *this);
+
+    addr = 0;
+    const int accept(0);
+    if (parser->parse() != accept) {
+        std::cerr << "Erro imprevisto na montagem." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    solveRef();
+
+    std::ofstream out;
+    out.open(dst);
+    for (auto n : assembly) {
+        out << n << " ";
+    }
+    out << std::endl;
+    out.close();
 }
 
 bool sb::Driver::hasSubstr(int nLine, std::string substr) {
@@ -51,9 +54,9 @@ bool sb::Driver::hasSubstr(int nLine, std::string substr) {
 
 void sb::Driver::printError(int nLine, std::string begin, std::string msg,
                             sb::errorType type) {
-    const std::string red    = COLOR(sb::color::red);
-    const std::string green  = COLOR(sb::color::green);
-    const std::string purple = COLOR(sb::color::purple);
+    const std::string red     = COLOR(sb::color::red);
+    const std::string green   = COLOR(sb::color::green);
+    const std::string magenta = COLOR(sb::color::magenta);
 
     std::ifstream f(src);
     std::string line;
@@ -73,7 +76,7 @@ void sb::Driver::printError(int nLine, std::string begin, std::string msg,
             std::cout << red << " Erro semântico: " << OFF;
             break;
         case sb::errorType::warning:
-            std::cout << purple << " Aviso: " << OFF;
+            std::cout << magenta << " Aviso: " << OFF;
             break;
     }
     std::cout << BOLD << msg << OFF << std::endl;
@@ -84,38 +87,36 @@ void sb::Driver::printError(int nLine, std::string begin, std::string msg,
     std::cout << "^" << std::endl << OFF;
 }
 
-void sb::Driver::writePreOutput(std::string dst) {
-    std::ofstream output;
-    output.open(dst);
-    for (auto line : preMap) {
-            output << line.second << std::endl;
+void sb::Driver::insertRef(std::string label) {
+    if (DEBUG) {
+        const std::string cyan = COLOR(sb::color::cyan);
+        std::cout << cyan << "Driver: " << OFF;
+        std::cout << "Insere Ref: " << label << " " << addr << std::endl;
     }
-    output.close();
+    refMap[label].push_back(addr);
 }
 
-void sb::Driver::insertEqu(std::string label, int value) {
-    equMap[label] = value;
-}
-
-void sb::Driver::insertLine(int nLine, std::string line) {
-    preMap[nLine] = line;
-}
-
-void sb::Driver::deleteLine(int nLine) {
-    std::map<int, std::string>::iterator it = preMap.find(nLine);
-
-    if (it == preMap.end()) return;
-    preMap.erase(it);
-}
-
-int sb::Driver::getEqu(std::string label) {
-    std::map<std::string, int>::iterator it = equMap.find(label);
-
-    if (it == equMap.end()) {
-        MapException e;
-        throw e;
+void sb::Driver::insertLabel(std::string label, int dec) {
+    if (DEBUG) {
+        const std::string cyan = COLOR(sb::color::cyan);
+        std::cout << cyan << "Driver: " << OFF;
+        std::cout << "Insere Label: " << label << " " << addr-dec << std::endl;
     }
-
-    return it->second;
+    labelMap[label] = addr - dec;
 }
 
+void sb::Driver::assembler(int value) {
+    assembly.push_back(value);
+    addr++;
+}
+
+void sb::Driver::solveRef() {
+    for (auto ref : refMap) {
+        std::map<std::string, int>::iterator it = labelMap.find(ref.first);
+        if (it != labelMap.end()) {
+            for (auto n : ref.second) {
+                assembly[n] = it->second;
+            }
+        }
+    }
+}
