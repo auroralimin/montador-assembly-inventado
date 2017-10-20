@@ -112,18 +112,12 @@ O montador deve:
     <td rowspan="1">A decidir</td>
   </tr>
   <tr>
-    <td rowspan="6">Parser</td>
-    <td>Diretivas inválidas</td>
-    <td rowspan="6">A decidir</td>
+    <td rowspan="4">Parser</td>
+    <td>Seção inválida</td>
+    <td rowspan="4">A decidir</td>
   </tr>
   <tr>
     <td>Dois rótulos na mesma linha</td>
-  </tr>
-  <tr>
-    <td>Seção inválida</td>
-  </tr>
-  <tr>
-    <td>Instruções inválidas</td>
   </tr>
   <tr>
     <td>Instruções com a quantidade de operando inválida</td>
@@ -132,9 +126,14 @@ O montador deve:
     <td>Tipo de argumento inválido</td>
   </tr>
   <tr>
-    <td rowspan="8">Análise semântica</td>
+    <td rowspan="10">Análise semântica</td>
+    <td>Instruções inválidas (supõe mneumônico desconhecido na seção TEXT) </td>
+    <td rowspan="10">A decidir</td>
+  </tr>
+  <td>Diretivas inválidas (supõe mneumônico desconhecido na seção DATA) </td>
+  </tr>
+  <tr>
     <td>Declarações e rótulos ausentes</td>
-    <td rowspan="8">A decidir</td>
   </tr>
   <tr>
     <td>Seção TEXT faltante</td>

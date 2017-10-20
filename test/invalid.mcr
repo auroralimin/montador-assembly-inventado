@@ -1,0 +1,25 @@
+SECTION DATA
+errado1
+ADD L1
+L2: SPACE
+CONST L5
+
+SECTION TEXT
+errado2
+ADD L1
+L2: SPACE
+CONST L5
+
+
+
+
+
+
+
+
+
+
+
+
+
+

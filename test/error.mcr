@@ -32,6 +32,35 @@ OLD_DATA: SPACE
 NEW_DATA: SPACE
 TMP_DATA: SPACE
 ADD
+oaikosa
 LOAD L1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

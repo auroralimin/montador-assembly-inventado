@@ -19,6 +19,7 @@ namespace sb {
             std::string instError(std::string name, int n1, int n2);
             void hasError();
             bool getErrorFlag();
+            bool hasSubstr(int nLine, std::string substr);
 
         private:
             std::string src;

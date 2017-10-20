@@ -39,6 +39,14 @@
                                           "COPY", "LOAD", "STORE",
                                           "INPUT", "OUTPUT", "STOP"};
     bool isSpace = false;
+
+    enum sec {
+        none = 0,
+        data = 1,
+        text = 2
+    };
+    
+    int cSec = sec::none;
 }
 
 /******************************************************************************/
@@ -79,6 +87,7 @@
 /*----------------------------------------------------------------------------*/
 %type <int>                          command
 %type <int>                          instruction
+%type <int>                          section
 %type <int>                          inst_name
 %type <int>                          directive
 %type <std::pair<int, std::string> > inst_dir
@@ -111,20 +120,45 @@ line
                              sb::errorType::sintatic);
           mError->hasError();
       }
-    | error end_line {
-        mError->printError(scanner.getLine() - 1, "", "Linha inválida.",
-                           sb::errorType::sintatic);
-        mError->hasError();
-    }
     ;
 
 command
     : instruction {
+          if (cSec == sec::data) {
+              std::string eMsg;
+              eMsg = "Instrução na seção errada: deveria estar na seção TEXT.";
+              mError->printError(scanner.getLine(), "", eMsg,
+                                 sb::errorType::semantic);
+              mError->hasError();
+          }
           $$ = $1;
       }
     | directive {
           $$ = $1;
+          if (cSec == sec::text) {
+              std::string eMsg;
+              eMsg = "Instrução na seção errada: deveria estar na seção DATA.";
+              mError->printError(scanner.getLine(), "", eMsg,
+                                 sb::errorType::semantic);
+              mError->hasError();
+          }
       }
+    | section { $$ = $1; }
+    | inst_dir {
+          std::string str = $1.second;
+          str = str.substr(0, str.find(" "));
+
+          if (cSec == sec::data) {
+              mError->printError(scanner.getLine(), str,
+                                 "Diretiva inválida: \"" + str + "\".",
+                                 sb::errorType::semantic);
+          } else {
+              mError->printError(scanner.getLine(), str,
+                                 "Instrução inválida: \"" + str + "\".",
+                                 sb::errorType::semantic);
+          }
+          mError->hasError();
+    }
     ;
    
 instruction
@@ -180,14 +214,6 @@ instruction
                              eMsg,sb::errorType::sintatic);
           mError->hasError();
       }
-    | inst_dir {
-          std::string str = $1.second;
-          std::string inst = str.substr(0, str.find(" "));
-          mError->printError(scanner.getLine(), inst,
-                             "Instrução/Diretiva inválida: \"" + inst + "\".",
-                             sb::errorType::sintatic);
-          mError->hasError();
-    }
     ;
 
 inst_name
@@ -206,13 +232,15 @@ inst_name
     | STOP    { $$ = 14; }
     ;
 
-directive
+section
     : SECTION TEXT {
           driver.textSection();
+          cSec = sec::text;
           $$ = 0;
       }
     | SECTION DATA {
           driver.dataSection();
+          cSec = sec::data;
           $$ = 0;
       }
     | SECTION inst_dir {
@@ -234,7 +262,10 @@ directive
                              sb::errorType::sintatic);
           mError->hasError();
       }
-    | SPACE {
+    ;
+
+directive
+    : SPACE {
           $$ = 1;
           driver.assembler(0);
       }
@@ -296,7 +327,7 @@ name
     | INVALID {
           $$ = $1;
           int nLine = scanner.getLine();
-          nLine = driver.hasSubstr(nLine, $1) ? nLine : nLine + 1;
+          nLine = mError->hasSubstr(nLine, $1) ? nLine : nLine + 1;
           mError->printError(nLine, $1, "Token inválido: \"" + $1 + "\".",
                             sb::errorType::lexical);
           mError->hasError();
@@ -304,8 +335,8 @@ name
     ;
 
 names
-    : name names
-    | name
+    : name names { $$ = $1 + " " + $2; }
+    | name { $$ = $1; }
     ;
 
 end_line

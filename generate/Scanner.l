@@ -193,7 +193,7 @@ CONST {
 }
 [+-]*(0x)*[0-9]+[ \n\t] {
     std::string str(yytext);
-    yyless(str.length()-1);
+    yyless(str.length() - 1);
     int num = std::stoi(yytext);
     yylval->build<int>(num);
     if (DEBUG) {

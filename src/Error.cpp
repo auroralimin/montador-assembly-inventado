@@ -64,3 +64,11 @@ bool sb::Error::getErrorFlag() {
     return errorFlag;
 }
 
+bool sb::Error::hasSubstr(int nLine, std::string substr) {
+    std::ifstream f(src);
+    std::string line;
+    for (int i = 1; i <= nLine; i++) std::getline(f, line);
+
+    return (line.find(substr) != std::string::npos);
+}
+
