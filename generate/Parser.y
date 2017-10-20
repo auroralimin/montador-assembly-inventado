@@ -38,15 +38,6 @@
                                           "JMP", "JMPN", "JMPP", "JMPZ",
                                           "COPY", "LOAD", "STORE",
                                           "INPUT", "OUTPUT", "STOP"};
-    bool isSpace = false;
-
-    enum sec {
-        none = 0,
-        data = 1,
-        text = 2
-    };
-    
-    int cSec = sec::none;
 }
 
 /******************************************************************************/
@@ -148,7 +139,7 @@ label
 
 command
     : instruction {
-          if (cSec == sec::data) {
+          if (driver.getSection() == sec::data) {
               std::string eMsg;
               eMsg = "Instrução na seção errada: deveria estar na seção TEXT.";
               mError->printError(scanner.getLine(), "", eMsg,
@@ -158,7 +149,7 @@ command
           $$ = $1;
       }
     | directive {
-          if (cSec == sec::text) {
+          if (driver.getSection() == sec::text) {
               std::string eMsg;
               eMsg = "Diretiva na seção errada: deveria estar na seção DATA.";
               mError->printError(scanner.getLine() + 1, "", eMsg,
@@ -172,7 +163,7 @@ command
           std::string str = $1.second;
           str = str.substr(0, str.find(" "));
 
-          if (cSec == sec::data) {
+          if (driver.getSection() == sec::data) {
               mError->printError(scanner.getLine(), str,
                                  "Diretiva inválida: \"" + str + "\".",
                                  sb::errorType::semantic);
@@ -261,12 +252,12 @@ inst_name
 section
     : SECTION TEXT {
           driver.textSection();
-          cSec = sec::text;
+          driver.setSection(sb::sec::text);
           $$ = 0;
       }
     | SECTION DATA {
           driver.dataSection();
-          cSec = sec::data;
+          driver.setSection(sb::sec::data);
           $$ = 0;
       }
     | SECTION inst_dir {

@@ -12,6 +12,12 @@
 #include "Parser.hxx"
 
 namespace sb{
+    enum sec {
+        none = 0,
+        data = 1,
+        text = 2
+    };
+ 
    class Driver{
         public:
             Driver(std::string src);
@@ -28,6 +34,8 @@ namespace sb{
             void solveRef(Error *error);
             void dataSection();
             void textSection();
+            void setSection(int s);
+            int getSection();
             int insertLabel(std::string label, int dec, int nLine);
 
             std::string src;
@@ -35,6 +43,7 @@ namespace sb{
             std::vector<std::pair<int, int> > assembly;
             std::map<std::string, std::pair<int, int> > labelMap;
             std::map<std::string, std::vector<int> > refMap;
+            int cSec;
     };
 }
 

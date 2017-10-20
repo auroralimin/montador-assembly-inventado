@@ -30,6 +30,7 @@ void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
 
     addr = 0;
     text = data = -1;
+    cSec = sb::sec::none;
     const int accept(0);
     if (parser->parse() != accept) {
         std::cerr << "Erro imprevisto na montagem." << std::endl;
@@ -77,7 +78,19 @@ void sb::Driver::solveRef(Error *error) {
         if (it != labelMap.end()) {
             for (auto n : ref.second) {
                 int nLine = assembly.at(n).second;
-                assembly[n] = std::make_pair(it->second.first, nLine);
+                int lAddr = it->second.first;
+                assembly[n] = std::make_pair(lAddr, nLine);
+
+                int pAddr = assembly[n - 1].first;
+                int pLine = assembly[n - 1].second;
+                if (((pAddr > 4) && (pAddr < 9)) && (lAddr >= text) &&
+                    ((text > data) || ((text < data) && (lAddr < data)))) {
+                    error->printError(pLine, ref.first,
+                                      "Pulo para seção inválida: \""
+                                      + ref.first + "\".",
+                                      sb::errorType::semantic);
+                }
+
             }
         } else {
             for (auto n : ref.second) {
@@ -106,6 +119,14 @@ void sb::Driver::dataSection() {
 
 void sb::Driver::textSection() {
     text = addr;
+}
+
+void sb::Driver::setSection(int s) {
+    cSec = s;
+}
+
+int sb::Driver::getSection() {
+    return cSec;
 }
 
 int sb::Driver::insertLabel(std::string label, int dec, int nLine) {
