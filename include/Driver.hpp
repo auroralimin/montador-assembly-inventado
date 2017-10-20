@@ -21,10 +21,9 @@ namespace sb{
 
             friend Parser;
         private:
-            bool hasSubstr(int nLine, std::string substr);
             void writeBin(std::string dst);
             void insertRef(std::string label);
-            void insertLabel(std::string label, int dec);
+            int insertLabel(std::string label, int dec, int nLine);
             void assembler(int value);
             void solveRef();
             void dataSection();
@@ -33,7 +32,7 @@ namespace sb{
             std::string src;
             int addr, text, data;
             std::vector<int> assembly;
-            std::map<std::string, int> labelMap;
+            std::map<std::string, std::pair<int, int> > labelMap;
             std::map<std::string, std::vector<int> > refMap;
     };
 }

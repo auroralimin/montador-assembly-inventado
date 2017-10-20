@@ -85,6 +85,7 @@
 /******************************************************************************/
 /*                                  TYPES                                     */
 /*----------------------------------------------------------------------------*/
+%type <std::pair<int, std::string> > label
 %type <int>                          command
 %type <int>                          instruction
 %type <int>                          section
@@ -107,12 +108,7 @@ one_pass
     ;
 
 line
-    : LABEL end_line {
-          driver.insertLabel($1, 0);
-      }
-    | LABEL command end_line {
-          driver.insertLabel($1, $2);
-      }
+    : label end_line
     | command end_line 
     | double_label end_line {
           mError->printError(scanner.getLine(), "", 
@@ -120,6 +116,34 @@ line
                              sb::errorType::sintatic);
           mError->hasError();
       }
+    ;
+
+label
+    : LABEL {
+          $$ = std::make_pair(0, $1); 
+          int old = driver.insertLabel($1, 0, scanner.getLine());
+          if (old > 0) {
+              std::string eMsg;
+              eMsg = "Declaração/Rótulo repetido: aparição anterior de \""
+                     + $1 + "\" foi na linha " + std::to_string(old) + ".";
+              mError->printError(scanner.getLine(), "", eMsg, 
+                                 sb::errorType::semantic);
+              mError->hasError();
+          }
+      }
+    | LABEL command {
+          $$ = std::make_pair(0, $1); 
+          int old = driver.insertLabel($1, $2 - 1, scanner.getLine());
+          if (old > 0) {
+              std::string eMsg;
+              eMsg = "Declaração/Rótulo repetido: aparição anterior de \""
+                     + $1 + "\" foi na linha " + std::to_string(old) + ".";
+              mError->printError(scanner.getLine(), "", eMsg, 
+                                 sb::errorType::semantic);
+              mError->hasError();
+          }
+      }
+ 
     ;
 
 command

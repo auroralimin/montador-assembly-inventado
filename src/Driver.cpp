@@ -46,13 +46,6 @@ void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
     if (!error->getErrorFlag()) writeBin(dst);
 }
 
-bool sb::Driver::hasSubstr(int nLine, std::string substr) {
-    std::ifstream f(src);
-    std::string line;
-    for (int i = 1; i <= nLine; i++) std::getline(f, line);
-
-    return (line.find(substr) != std::string::npos);
-}
 void sb::Driver::writeBin(std::string dst) {
     std::ofstream out;
     out.open(dst);
@@ -73,13 +66,20 @@ void sb::Driver::insertRef(std::string label) {
     refMap[label].push_back(addr);
 }
 
-void sb::Driver::insertLabel(std::string label, int dec) {
+int sb::Driver::insertLabel(std::string label, int dec, int nLine) {
     if (DEBUG) {
         const std::string cyan = COLOR(sb::color::cyan);
         std::cout << cyan << "Driver: " << OFF;
         std::cout << "Insere Label: " << label << " " << addr-dec << std::endl;
     }
-    labelMap[label] = addr - dec;
+    if (labelMap.find(label) != labelMap.end()) {
+        int oldLine = labelMap.at(label).second;
+        labelMap[label] = std::make_pair(addr - dec, nLine);
+        return oldLine;
+    }
+    
+    labelMap[label] = std::make_pair(addr - dec, nLine);
+    return -1;
 }
 
 void sb::Driver::assembler(int value) {
@@ -89,10 +89,11 @@ void sb::Driver::assembler(int value) {
 
 void sb::Driver::solveRef() {
     for (auto ref : refMap) {
-        std::map<std::string, int>::iterator it = labelMap.find(ref.first);
+        std::map<std::string, std::pair<int, int> >::iterator it;
+        it = labelMap.find(ref.first);
         if (it != labelMap.end()) {
             for (auto n : ref.second) {
-                assembly[n] = it->second;
+                assembly[n] = it->second.first;
             }
         }
     }
