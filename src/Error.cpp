@@ -15,10 +15,15 @@ void sb::Error::printError(int nLine, std::string begin, std::string msg,
 
     std::ifstream f(src);
     std::string line;
-    for (int i = 1; i <= nLine; i++) std::getline(f, line);
-
+    
     std::size_t col;
-    col = begin == "" ? 0 : line.find(begin);
+    if (nLine > 0) {
+        for (int i = 1; i <= nLine; i++) std::getline(f, line);
+        col = (begin == "") ? 0 : line.find(begin);
+    } else {
+        col = -1;
+    }
+
 
     std::cout << BOLD << src << ":" << nLine << ":" << col + 1 << ":" << OFF;
     switch (type) {
@@ -37,10 +42,12 @@ void sb::Error::printError(int nLine, std::string begin, std::string msg,
     }
     std::cout << BOLD << msg << OFF << std::endl;
 
-    std::cout << line << std::endl << green;
-    for (unsigned long i = 0; i < col; i++)
-        std::cout << "~";
-    std::cout << "^" << std::endl << OFF;
+    if (nLine > 0) {
+        std::cout << line << std::endl << green;
+        for (unsigned long i = 0; i < col; i++)
+            std::cout << "~";
+        std::cout << "^" << std::endl << OFF;
+    }
 }
 
 std::string sb::Error::instError(std::string name, int n1, int n2) {

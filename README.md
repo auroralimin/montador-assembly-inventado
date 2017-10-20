@@ -107,17 +107,17 @@ O montador deve:
   <tr>
     <td rowspan="15">Passagem única</td>
     <td rowspan="15">-o</td>
-    <td rowspan="2">Scanner</td>
+    <td rowspan="1">Scanner</td>
     <td>Tokens inválidos</td>
-    <td rowspan="2">A decidir</td>
+    <td rowspan="1">A decidir</td>
+  </tr>
+  <tr>
+    <td rowspan="6">Parser</td>
+    <td>Diretivas inválidas</td>
+    <td rowspan="6">A decidir</td>
   </tr>
   <tr>
     <td>Dois rótulos na mesma linha</td>
-  </tr>
-  <tr>
-    <td rowspan="5">Parser</td>
-    <td>Diretivas inválidas</td>
-    <td rowspan="5">A decidir</td>
   </tr>
   <tr>
     <td>Seção inválida</td>

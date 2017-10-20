@@ -27,9 +27,11 @@ namespace sb{
             void insertLabel(std::string label, int dec);
             void assembler(int value);
             void solveRef();
+            void dataSection();
+            void textSection();
 
             std::string src;
-            int addr;
+            int addr, text, data;
             std::vector<int> assembly;
             std::map<std::string, int> labelMap;
             std::map<std::string, std::vector<int> > refMap;

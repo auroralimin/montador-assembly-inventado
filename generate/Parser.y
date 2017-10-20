@@ -82,7 +82,9 @@
 %type <int>                          inst_name
 %type <int>                          directive
 %type <std::pair<int, std::string> > inst_dir
+%type <std::string>                  double_label
 %type <std::string>                  name
+%type <std::string>                  names
 
 %locations
 
@@ -103,6 +105,17 @@ line
           driver.insertLabel($1, $2);
       }
     | command end_line 
+    | double_label end_line {
+          mError->printError(scanner.getLine(), "", 
+                             "Dois rótulos na mesma linha: \"" + $1 + "\".",
+                             sb::errorType::sintatic);
+          mError->hasError();
+      }
+    | error end_line {
+        mError->printError(scanner.getLine() - 1, "", "Linha inválida.",
+                           sb::errorType::sintatic);
+        mError->hasError();
+    }
     ;
 
 command
@@ -135,7 +148,7 @@ instruction
               driver.insertRef($2);
               driver.assembler(-1);
           } else {
-              mError->printError(scanner.getLine(), "", 
+              mError->printError(scanner.getLine(), $2, 
                                  mError->instError(instructions[$1-1],nArgs,1),
                                  sb::errorType::sintatic);
               mError->hasError();
@@ -149,11 +162,21 @@ instruction
           driver.insertRef($4);
           driver.assembler(-1);
       }
+    | inst_name NUM {
+          std::string eMsg = "Tipo de argumento inválido: \"" +
+                             std::to_string($2) + "\" não é um rótulo.";
+          mError->printError(scanner.getLine(), std::to_string($2),
+                             eMsg, sb::errorType::sintatic);
+          mError->hasError();
+
+      }
     | inst_name inst_dir {
           int nArgs = args[$1-1];
+          std::string str = $2.second;
+          str = str.substr(0, str.find(" "));
           std::string eMsg = mError->instError(instructions[$1 - 1],
                                                nArgs, $2.first);
-          mError->printError(scanner.getLine(), "", 
+          mError->printError(scanner.getLine(), str, 
                              eMsg,sb::errorType::sintatic);
           mError->hasError();
       }
@@ -161,7 +184,7 @@ instruction
           std::string str = $1.second;
           std::string inst = str.substr(0, str.find(" "));
           mError->printError(scanner.getLine(), inst,
-                             "Instrução inválida: \"" + inst + "\".",
+                             "Instrução/Diretiva inválida: \"" + inst + "\".",
                              sb::errorType::sintatic);
           mError->hasError();
     }
@@ -185,24 +208,29 @@ inst_name
 
 directive
     : SECTION TEXT {
+          driver.textSection();
           $$ = 0;
       }
     | SECTION DATA {
+          driver.dataSection();
           $$ = 0;
       }
     | SECTION inst_dir {
           $$ = 0;
-          std::string eMsg = "Seção inválida: \"" + $2.second +
-                             "\" não é um nome de seção válido.";
-          mError->printError(scanner.getLine(), $2.second,
-                             eMsg, sb::errorType::sintatic);
+          std::string str = $2.second;
+          str = str.substr(0, str.find(" "));
+          std::string eMsg = "Tipo de argumento inválido: ";
+          std::string eMsg2 = "espera-se \"TEXT\" ou \"DATA\", obteu-se \""
+                              + $2.second + "\".";
+          mError->printError(scanner.getLine(), str,
+                             eMsg + eMsg2, sb::errorType::sintatic);
           mError->hasError();
       }
     | SECTION {
           $$ = 0;
           std::string eMsg;
           eMsg = "Seção inválida: é necessário informar se é TEXT ou DATA.";
-          mError->printError(scanner.getLine() + 1, "", eMsg,
+          mError->printError(scanner.getLine(), "", eMsg,
                              sb::errorType::sintatic);
           mError->hasError();
       }
@@ -214,20 +242,52 @@ directive
           $$ = $2;
           for (int i = 0; i < $2; i++) driver.assembler(0);
       }
+    | SPACE names {
+          $$ = 0;
+          std::string str = $2;
+          str = str.substr(0, str.find(" "));
+          std::string eMsg = "Tipo de argumento inválido: \"" + $2 +
+                             "\" não é um número.";
+          mError->printError(scanner.getLine(), str,
+                             eMsg, sb::errorType::sintatic);
+          mError->hasError();
+      }
     | CONST NUM {
           $$ = 1;
           driver.assembler($2);
       }
+    | CONST names {
+          $$ = 0;
+          std::string str = $2;
+          str = str.substr(0, str.find(" "));
+          std::string eMsg = "Tipo de argumento inválido: \"" + $2 +
+                             "\" não é um número.";
+          mError->printError(scanner.getLine(), str,
+                             eMsg, sb::errorType::sintatic);
+          mError->hasError();
+      }
     ;
 
 inst_dir
-    : name inst_dir {
-          $$ = std::make_pair($2.first + 1, $1 + " " + $2.second);
+    : name inst_dir { $$ = std::make_pair($2.first + 1, $1 + " " + $2.second); }
+    | name { $$ = std::make_pair(1, $1); }
+    | COMMA inst_dir { $$ = std::make_pair($2.first + 1, ", " + $2.second); }
+    | COMMA { $$ = std::make_pair(1, ","); }
+    | NUM inst_dir {
+          $$ = std::make_pair($2.first + 1,
+                              std::to_string($1) + ", " + $2.second);
       }
-    | name {
-          $$ = std::make_pair(1, $1);
-      }
+    | NUM { $$ = std::make_pair(1, std::to_string($1)); }
     ;
+
+double_label
+    : LABEL LABEL { $$ = $1 + " " + $2; }
+    | inst_dir LABEL LABEL { $$ = $2 + " " + $3; }
+    | LABEL inst_dir LABEL { $$ = $1 + " " + $3; }
+    | LABEL LABEL inst_dir { $$ = $1 + ", " + $2; }
+    | inst_dir LABEL inst_dir LABEL { $$ = $2 + ", " + $4; }
+    | inst_dir LABEL LABEL inst_dir { $$ = $2 + ", " + $3; }
+    | inst_dir LABEL inst_dir LABEL inst_dir {$$ = $2 + ", " + $4; }
 
 name
     : NAME {
@@ -243,6 +303,11 @@ name
       }
     ;
 
+names
+    : name names
+    | name
+    ;
+
 end_line
     : ENDL end_line
     | ENDL
@@ -252,7 +317,6 @@ end_line
 
 void sb::Parser::error(const location_type &l, const std::string &errMsg) {
     UNUSED_VAR l;
-    std::cerr << "Erro na linha " << scanner.getLine() + 1 << ": " 
-              << errMsg << std::endl;
+    UNUSED_VAR errMsg;
 }
 

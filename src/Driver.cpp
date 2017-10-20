@@ -30,12 +30,18 @@ void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
     sb::Parser *parser = new sb::Parser(*scanner, *this, error);
 
     addr = 0;
+    text = data = -1;
     const int accept(0);
     if (parser->parse() != accept) {
         std::cerr << "Erro imprevisto na montagem." << std::endl;
         exit(EXIT_FAILURE);
     }
-
+    
+    if (text == -1) {
+        error->hasError();
+        error->printError(0, "", "Seção TEXT faltante.",
+                          sb::errorType::semantic);
+    }
     solveRef();
     if (!error->getErrorFlag()) writeBin(dst);
 }
@@ -90,5 +96,13 @@ void sb::Driver::solveRef() {
             }
         }
     }
+}
+
+void sb::Driver::dataSection() {
+    data = addr;
+}
+
+void sb::Driver::textSection() {
+    text = addr;
 }
 
