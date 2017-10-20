@@ -38,6 +38,7 @@
                                           "JMP", "JMPN", "JMPP", "JMPZ",
                                           "COPY", "LOAD", "STORE",
                                           "INPUT", "OUTPUT", "STOP"};
+    bool isConst = false;
 }
 
 /******************************************************************************/
@@ -110,9 +111,10 @@ line
     ;
 
 label
-    : LABEL {
+    : LABEL end_line command{
           $$ = std::make_pair(0, $1); 
-          int old = driver.insertLabel($1, 0, scanner.getLine());
+          int old = driver.insertLabel($1, $3, scanner.getLine(), isConst);
+          isConst = false;
           if (old > 0) {
               std::string eMsg;
               eMsg = "Declaração/Rótulo repetido: aparição anterior de \""
@@ -124,7 +126,8 @@ label
       }
     | LABEL command {
           $$ = std::make_pair(0, $1); 
-          int old = driver.insertLabel($1, $2, scanner.getLine());
+          int old = driver.insertLabel($1, $2, scanner.getLine(), isConst);
+          isConst = false;
           if (old > 0) {
               std::string eMsg;
               eMsg = "Declaração/Rótulo repetido: aparição anterior de \""
@@ -302,10 +305,13 @@ directive
       }
     | CONST NUM {
           $$ = 1;
+          isConst = true;
           driver.assembler($2, scanner.getLine());
       }
     | CONST names {
           $$ = 0;
+          isConst = true;
+          driver.assembler(-1, scanner.getLine());
           std::string str = $2;
           str = str.substr(0, str.find(" "));
           std::string eMsg = "Tipo de argumento inválido: \"" + $2 +

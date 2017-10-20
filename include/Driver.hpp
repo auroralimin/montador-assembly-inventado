@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <istream>
 #include <utility> 
+#include <tuple>
 #include <map>
 
 #include "Scanner.hpp"
@@ -36,12 +37,12 @@ namespace sb{
             void textSection();
             void setSection(int s);
             int getSection();
-            int insertLabel(std::string label, int dec, int nLine);
+            int insertLabel(std::string label, int dec, int nLine, bool c);
 
             std::string src;
             int addr, text, data;
             std::vector<std::pair<int, int> > assembly;
-            std::map<std::string, std::pair<int, int> > labelMap;
+            std::map<std::string, std::tuple<int, int, bool> > labelMap;
             std::map<std::string, std::vector<int> > refMap;
             int cSec;
     };

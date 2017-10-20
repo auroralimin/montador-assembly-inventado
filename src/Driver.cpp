@@ -73,12 +73,12 @@ void sb::Driver::assembler(int value, int nLine) {
 
 void sb::Driver::solveRef(Error *error) {
     for (auto ref : refMap) {
-        std::map<std::string, std::pair<int, int> >::iterator it;
+        std::map<std::string, std::tuple<int, int, bool> >::iterator it;
         it = labelMap.find(ref.first);
         if (it != labelMap.end()) {
             for (auto n : ref.second) {
                 int nLine = assembly.at(n).second;
-                int lAddr = it->second.first;
+                int lAddr = std::get<0>(it->second);
                 assembly[n] = std::make_pair(lAddr, nLine);
 
                 int pAddr = assembly[n - 1].first;
@@ -89,8 +89,24 @@ void sb::Driver::solveRef(Error *error) {
                                       "Pulo para seção inválida: \""
                                       + ref.first + "\".",
                                       sb::errorType::semantic);
+                } else if (std::get<2>(it->second)) {
+                    if (pAddr == 9) { 
+                        error->printError(nLine + 1, ref.first,
+                                         "Modificação de constante: \""
+                                          + ref.first + "\".",
+                                          sb::errorType::semantic);
+                    } else if ((pAddr == 11) || (pAddr == 12)) { 
+                        error->printError(nLine, ref.first,
+                                         "Modificação de constante: \""
+                                          + ref.first + "\".",
+                                          sb::errorType::semantic);
+                    } else if ((pAddr == 4) && (assembly[lAddr].first == 0)) {
+                        error->printError(nLine, ref.first,
+                                         "Divisão por zero/inválido: \""
+                                          + ref.first + "\".",
+                                          sb::errorType::semantic);
+                    }
                 }
-
             }
         } else {
             for (auto n : ref.second) {
@@ -129,19 +145,19 @@ int sb::Driver::getSection() {
     return cSec;
 }
 
-int sb::Driver::insertLabel(std::string label, int dec, int nLine) {
+int sb::Driver::insertLabel(std::string label, int dec, int nLine, bool c) {
     if (DEBUG) {
         const std::string cyan = COLOR(sb::color::cyan);
         std::cout << cyan << "Driver: " << OFF;
         std::cout << "Insere Label: " << label << " " << addr-dec << std::endl;
     }
     if (labelMap.find(label) != labelMap.end()) {
-        int oldLine = labelMap.at(label).second;
-        labelMap[label] = std::make_pair(addr - dec, nLine);
+        int oldLine = std::get<1>(labelMap.at(label));
+        labelMap[label] = std::make_tuple(addr - dec, nLine, c);
         return oldLine;
     }
     
-    labelMap[label] = std::make_pair(addr - dec, nLine);
+    labelMap[label] = std::make_tuple(addr - dec, nLine, c);
     return -1;
 }
 
