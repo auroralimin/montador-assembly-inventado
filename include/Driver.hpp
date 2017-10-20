@@ -24,7 +24,7 @@ namespace sb{
         private:
             void writeBin(std::string dst);
             void insertRef(std::string label);
-            void assembler(int value);
+            void assembler(int value, int nLine);
             void solveRef(Error *error);
             void dataSection();
             void textSection();
@@ -32,7 +32,7 @@ namespace sb{
 
             std::string src;
             int addr, text, data;
-            std::vector<int> assembly;
+            std::vector<std::pair<int, int> > assembly;
             std::map<std::string, std::pair<int, int> > labelMap;
             std::map<std::string, std::vector<int> > refMap;
     };

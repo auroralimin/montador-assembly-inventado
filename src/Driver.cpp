@@ -49,7 +49,7 @@ void sb::Driver::writeBin(std::string dst) {
     std::ofstream out;
     out.open(dst);
     for (auto n : assembly) {
-        out << n << " ";
+        out << n.first << " ";
     }
     out << std::endl;
     out.close();
@@ -65,8 +65,8 @@ void sb::Driver::insertRef(std::string label) {
     refMap[label].push_back(addr);
 }
 
-void sb::Driver::assembler(int value) {
-    assembly.push_back(value);
+void sb::Driver::assembler(int value, int nLine) {
+    assembly.push_back(std::make_pair(value, nLine));
     addr++;
 }
 
@@ -76,11 +76,25 @@ void sb::Driver::solveRef(Error *error) {
         it = labelMap.find(ref.first);
         if (it != labelMap.end()) {
             for (auto n : ref.second) {
-                assembly[n] = it->second.first;
+                int nLine = assembly.at(n).second;
+                assembly[n] = std::make_pair(it->second.first, nLine);
             }
         } else {
-            error->printError(0, "", "Declaração/Rótulo ausente: \""
-                              + ref.first + "\".", sb::errorType::semantic);
+            for (auto n : ref.second) {
+                int nLine = assembly[n].second;
+                error->printError(nLine, ref.first,
+                                  "Declaração/Rótulo ausente: \""
+                                  + ref.first + "\".", sb::errorType::semantic);
+
+                int pAddr = assembly[n - 1].first;
+                int pLine = assembly[n - 1].second;
+                if ((pAddr > 4) && (pAddr < 9)) {
+                    error->printError(pLine, ref.first,
+                                      "Pulo para rótulo inválido: \""
+                                      + ref.first + "\".",
+                                      sb::errorType::semantic);
+                }
+            }
             error->hasError();
         }
     }

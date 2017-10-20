@@ -158,14 +158,14 @@ command
           $$ = $1;
       }
     | directive {
-          $$ = $1;
           if (cSec == sec::text) {
               std::string eMsg;
-              eMsg = "Instrução na seção errada: deveria estar na seção DATA.";
-              mError->printError(scanner.getLine(), "", eMsg,
+              eMsg = "Diretiva na seção errada: deveria estar na seção DATA.";
+              mError->printError(scanner.getLine() + 1, "", eMsg,
                                  sb::errorType::semantic);
               mError->hasError();
           }
+          $$ = $1;
       }
     | section { $$ = $1; }
     | inst_dir {
@@ -190,7 +190,7 @@ instruction
           int nArgs = args[$1-1];
           $$ = 1;
           if (nArgs == 0) {
-              driver.assembler($1);
+              driver.assembler($1, scanner.getLine());
           } else {
               mError->printError(scanner.getLine(), "", 
                                  mError->instError(instructions[$1-1],nArgs,0),
@@ -202,9 +202,10 @@ instruction
           int nArgs = args[$1-1];
           $$ = 2;
           if (nArgs == 1) {
-              driver.assembler($1);
+              int nLine = scanner.getLine();
+              driver.assembler($1, nLine);
               driver.insertRef($2);
-              driver.assembler(-1);
+              driver.assembler(-1, nLine);
           } else {
               mError->printError(scanner.getLine(), $2, 
                                  mError->instError(instructions[$1-1],nArgs,1),
@@ -214,11 +215,12 @@ instruction
       }
     | COPY name COMMA name {
           $$ = 3;
-          driver.assembler(9);
+          int nLine = scanner.getLine();
+          driver.assembler(9, nLine);
           driver.insertRef($2);
-          driver.assembler(-1);
+          driver.assembler(-1, nLine);
           driver.insertRef($4);
-          driver.assembler(-1);
+          driver.assembler(-1, nLine);
       }
     | inst_name NUM {
           std::string eMsg = "Tipo de argumento inválido: \"" +
@@ -291,11 +293,11 @@ section
 directive
     : SPACE {
           $$ = 1;
-          driver.assembler(0);
+          driver.assembler(0, scanner.getLine());
       }
     | SPACE NUM {
           $$ = $2;
-          for (int i = 0; i < $2; i++) driver.assembler(0);
+          for (int i = 0; i < $2; i++) driver.assembler(0, scanner.getLine());
       }
     | SPACE names {
           $$ = 0;
@@ -309,7 +311,7 @@ directive
       }
     | CONST NUM {
           $$ = 1;
-          driver.assembler($2);
+          driver.assembler($2, scanner.getLine());
       }
     | CONST names {
           $$ = 0;
