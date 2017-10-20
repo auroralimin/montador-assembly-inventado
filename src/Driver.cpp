@@ -4,7 +4,6 @@
 #include <fstream>
 #include <iostream>
 
-#include "Error.hpp"
 #include "OutFormat.hpp"
 #include "MapException.hpp"
 
@@ -42,7 +41,7 @@ void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
         error->printError(0, "", "Seção TEXT faltante.",
                           sb::errorType::semantic);
     }
-    solveRef();
+    solveRef(error);
     if (!error->getErrorFlag()) writeBin(dst);
 }
 
@@ -66,6 +65,35 @@ void sb::Driver::insertRef(std::string label) {
     refMap[label].push_back(addr);
 }
 
+void sb::Driver::assembler(int value) {
+    assembly.push_back(value);
+    addr++;
+}
+
+void sb::Driver::solveRef(Error *error) {
+    for (auto ref : refMap) {
+        std::map<std::string, std::pair<int, int> >::iterator it;
+        it = labelMap.find(ref.first);
+        if (it != labelMap.end()) {
+            for (auto n : ref.second) {
+                assembly[n] = it->second.first;
+            }
+        } else {
+            error->printError(0, "", "Declaração/Rótulo ausente: \""
+                              + ref.first + "\".", sb::errorType::semantic);
+            error->hasError();
+        }
+    }
+}
+
+void sb::Driver::dataSection() {
+    data = addr;
+}
+
+void sb::Driver::textSection() {
+    text = addr;
+}
+
 int sb::Driver::insertLabel(std::string label, int dec, int nLine) {
     if (DEBUG) {
         const std::string cyan = COLOR(sb::color::cyan);
@@ -80,30 +108,5 @@ int sb::Driver::insertLabel(std::string label, int dec, int nLine) {
     
     labelMap[label] = std::make_pair(addr - dec, nLine);
     return -1;
-}
-
-void sb::Driver::assembler(int value) {
-    assembly.push_back(value);
-    addr++;
-}
-
-void sb::Driver::solveRef() {
-    for (auto ref : refMap) {
-        std::map<std::string, std::pair<int, int> >::iterator it;
-        it = labelMap.find(ref.first);
-        if (it != labelMap.end()) {
-            for (auto n : ref.second) {
-                assembly[n] = it->second.first;
-            }
-        }
-    }
-}
-
-void sb::Driver::dataSection() {
-    data = addr;
-}
-
-void sb::Driver::textSection() {
-    text = addr;
 }
 

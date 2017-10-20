@@ -133,7 +133,7 @@ label
       }
     | LABEL command {
           $$ = std::make_pair(0, $1); 
-          int old = driver.insertLabel($1, $2 - 1, scanner.getLine());
+          int old = driver.insertLabel($1, $2, scanner.getLine());
           if (old > 0) {
               std::string eMsg;
               eMsg = "Declaração/Rótulo repetido: aparição anterior de \""

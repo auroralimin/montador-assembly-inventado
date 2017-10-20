@@ -8,6 +8,7 @@
 #include <map>
 
 #include "Scanner.hpp"
+#include "Error.hpp"
 #include "Parser.hxx"
 
 namespace sb{
@@ -23,11 +24,11 @@ namespace sb{
         private:
             void writeBin(std::string dst);
             void insertRef(std::string label);
-            int insertLabel(std::string label, int dec, int nLine);
             void assembler(int value);
-            void solveRef();
+            void solveRef(Error *error);
             void dataSection();
             void textSection();
+            int insertLabel(std::string label, int dec, int nLine);
 
             std::string src;
             int addr, text, data;
