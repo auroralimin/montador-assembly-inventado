@@ -85,14 +85,12 @@ O montador deve:
     <td><strong>Flag</strong></td>
     <td><strong>Tarefa</strong></td>
     <td><strong>Erros a serem identificados</strong></td>
-    <td><strong>Solução proposta para a implementação</strong></td>
   </tr>
   <tr>
     <td rowspan="4">Pré processamento</td>
     <td rowspan="3">-p</td>
     <td>Desconsiderar tabulações, quebra de linhas e espaços desnecessários</td>
     <td rowspan="4">-</td>
-    <td rowspan="4">A decidir</td>
   </tr>
   <tr>
     <td>Retirar Comentários</td>
@@ -109,12 +107,10 @@ O montador deve:
     <td rowspan="15">-o</td>
     <td rowspan="1">Scanner</td>
     <td>Tokens inválidos</td>
-    <td rowspan="1">A decidir</td>
   </tr>
   <tr>
     <td rowspan="4">Parser</td>
     <td>Seção inválida</td>
-    <td rowspan="4">A decidir</td>
   </tr>
   <tr>
     <td>Dois rótulos na mesma linha</td>
@@ -128,7 +124,6 @@ O montador deve:
   <tr>
     <td rowspan="10">Análise semântica</td>
     <td>Instruções inválidas (supõe mneumônico desconhecido na seção TEXT) </td>
-    <td rowspan="10">A decidir</td>
   </tr>
   <td>Diretivas inválidas (supõe mneumônico desconhecido na seção DATA) </td>
   </tr>
