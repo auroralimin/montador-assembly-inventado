@@ -37,3 +37,6 @@ montador
 *.pre
 *.mcr
 
+# Dcoumentação gerada
+latex/
+doc/

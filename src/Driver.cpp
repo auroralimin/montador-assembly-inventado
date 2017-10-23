@@ -135,7 +135,7 @@ void sb::Driver::textSection() {
     text = addr;
 }
 
-void sb::Driver::setSection(int s) {
+void sb::Driver::setSection(sb::sec s) {
     cSec = s;
 }
 

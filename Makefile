@@ -15,6 +15,10 @@ SRC_PATH = src
 BIN_PATH = bin
 DEP_PATH = dep
 
+# Caminho para as documentações geradas do código
+DOC_PATH = doc
+LAT_PATH = doc
+
 # Caminho para arquivos Flex e Bison
 GEN_PATH = generate
 
@@ -63,7 +67,7 @@ release: all
 
 # Regra para limpar/deletar todos os arquivos e diretórios criados pelo make
 clean:
-	rm -rf $(BIN_PATH) $(DEP_PATH) 
+	rm -rf $(BIN_PATH) $(DEP_PATH) $(DOC_PATH) $(LAT_PATH)
 	rm -f $(EXEC) $(SRC_PATH)/*.cxx $(INC_PATH)/*.hxx $(INC_PATH)/*.hh
 
 # Gera o código do scanner e do parser e coloca-os nas pastas corretas
@@ -76,10 +80,14 @@ generate:
 # Regra para printar uma variável no terminal. Auxilia no debug do Makefile
 print-% : ; @echo $* = $($*)
 
+# Regra para gerar a documentação com Doxygen
+doc:
+	doxygen Doxyfile
+
 # Regra que estabelece que arquivos .d são "preciosos"
 .PRECIOUS: $(DEP_PATH)/%.d
 # Regra que torna as dependências "phony"
-.PHONY: debug clean release generate
+.PHONY: debug clean release generate doc
 
 # Inclui as regras geradas pelos arquivos de dependência
 -include $(DEP_FILES)
