@@ -44,9 +44,15 @@ void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
 }
 
 void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
-    UNUSED_VAR srcStream;
-    UNUSED_VAR dst;
-    //TODO: Implementar o processamento em um passo
+    
+    // cria arquivo intermediário
+    std::ofstream file;
+    file.open("macro_intermediario.txt");
+    file << srcStream.rdbuf();
+    file.close();
+    
+    // chama o programa que abre as macros
+    system((std::string("./src/macro/macro_exec ") + dst + " 1").c_str());
 }
 
 bool sb::Driver::hasSubstr(int nLine, std::string substr) {

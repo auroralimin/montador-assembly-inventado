@@ -41,8 +41,7 @@ int main(int argc, char **argv) {
     }
     else if (flag == "-o") {
         std::string pre = process(driver, argv[2], dst, PType::pre);
-        std::string mcr = process(driver, pre.c_str(), dst, PType::mcr);
-        process(driver, mcr.c_str(), dst, PType::o);
+        process(driver, pre.c_str(), dst, PType::o);
     }
     else {
         delete driver;
