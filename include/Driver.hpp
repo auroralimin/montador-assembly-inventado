@@ -23,8 +23,6 @@ namespace sb{
         public:
             Driver(std::string src);
             virtual ~Driver() {};
-            void preProcess    (std::istream &srcStream, std::string dst);
-            void macroProcess  (std::istream &srcStream, std::string dst);
             void onePassProcess(std::istream &srcStream, std::string dst);
 
             friend Parser;

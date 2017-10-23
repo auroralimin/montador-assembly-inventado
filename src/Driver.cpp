@@ -7,21 +7,7 @@
 #include "OutFormat.hpp"
 #include "MapException.hpp"
 
-#define UNUSED_VAR (void)
-
 sb::Driver::Driver(std::string src) : src(src) {}
-
-void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
-    UNUSED_VAR srcStream;
-    UNUSED_VAR dst;
-    //TODO: Integrar o pré-processamento
-}
-
-void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
-    UNUSED_VAR srcStream;
-    UNUSED_VAR dst;
-    //TODO: Implementar pre-processamento de macro
-}
 
 void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
     Error *error = new Error(src);

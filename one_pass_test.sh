@@ -10,7 +10,7 @@ OFF='\033[0m'
 echo "---------------------------------------------"
 for file in ${testdir}/*.mcr; do
     name=`basename ${file} .mcr`".o"
-    ./montador -o $file ${name} > /dev/null
+    ./montador $file ${name} > /dev/null
     echo "${BOLD}Montando ${name}:${OFF}"
     if diff ${name} ${resultdir}/${name} 
     then
