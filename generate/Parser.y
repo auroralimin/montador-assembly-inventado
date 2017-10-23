@@ -72,6 +72,7 @@
 %token               DATA
 %token               ENDL
 %token               COMMA
+%token               PLUS
 %token               END 0
 
 /******************************************************************************/
@@ -84,6 +85,7 @@
 %type <int>                          inst_name
 %type <int>                          directive
 %type <std::pair<int, std::string> > inst_dir
+%type <std::pair<int, std::string> > addr
 %type <std::string>                  double_label
 %type <std::string>                  name
 %type <std::string>                  names
@@ -192,29 +194,29 @@ instruction
               mError->hasError();
           }
       }
-    | inst_name name {
+    | inst_name addr {
           int nArgs = args[$1-1];
           $$ = 2;
           if (nArgs == 1) {
               int nLine = scanner.getLine();
               driver.assembler($1, nLine);
-              driver.insertRef($2);
-              driver.assembler(-1, nLine);
+              driver.insertRef($2.second);
+              driver.assembler($2.first, nLine);
           } else {
-              mError->printError(scanner.getLine(), $2, 
+              mError->printError(scanner.getLine(), $2.second, 
                                  mError->instError(instructions[$1-1],nArgs,1),
                                  sb::errorType::sintatic);
               mError->hasError();
           }
       }
-    | COPY name COMMA name {
+    | COPY addr COMMA addr {
           $$ = 3;
-          int nLine = scanner.getLine();
+          int nLine = scanner.getLine() - 1;
           driver.assembler(9, nLine);
-          driver.insertRef($2);
-          driver.assembler(-1, nLine);
-          driver.insertRef($4);
-          driver.assembler(-1, nLine);
+          driver.insertRef($2.second);
+          driver.assembler($2.first, nLine);
+          driver.insertRef($4.second);
+          driver.assembler($4.first, nLine);
       }
     | inst_name NUM {
           std::string eMsg = "Tipo de argumento inválido: \"" +
@@ -234,6 +236,11 @@ instruction
                              eMsg,sb::errorType::sintatic);
           mError->hasError();
       }
+    ;
+
+addr
+    : name { $$ = std::make_pair(0, $1); }
+    | name PLUS NUM { $$ = std::make_pair($3, $1); }
     ;
 
 inst_name

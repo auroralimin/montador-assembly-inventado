@@ -77,34 +77,46 @@ void sb::Driver::solveRef(Error *error) {
         it = labelMap.find(ref.first);
         if (it != labelMap.end()) {
             for (auto n : ref.second) {
+                int aAddr = assembly.at(n).first;
                 int nLine = assembly.at(n).second;
                 int lAddr = std::get<0>(it->second);
-                assembly[n] = std::make_pair(lAddr, nLine);
+
+                if (DEBUG) {
+                    const std::string cyan = COLOR(sb::color::cyan);
+                    std::cout << cyan << "Driver: " << OFF;
+                    std::cout << "lAddr " << ref.first << " " << lAddr
+                              << std::endl;
+                }
+                assembly[n] = std::make_pair(lAddr + aAddr, nLine);
 
                 int pAddr = assembly[n - 1].first;
                 int pLine = assembly[n - 1].second;
-                if (((pAddr > 4) && (pAddr < 9)) && (lAddr >= text) &&
-                    ((text > data) || ((text < data) && (lAddr < data)))) {
+                if (((pAddr > 4) && (pAddr < 9)) &&
+                    ((lAddr < text) || ((text < data) && (lAddr >= data)))) {
                     error->printError(pLine, ref.first,
                                       "Pulo para seção inválida: \""
                                       + ref.first + "\".",
                                       sb::errorType::semantic);
+                    error->hasError();
                 } else if (std::get<2>(it->second)) {
                     if (pAddr == 9) { 
                         error->printError(nLine + 1, ref.first,
                                          "Modificação de constante: \""
                                           + ref.first + "\".",
                                           sb::errorType::semantic);
+                        error->hasError();
                     } else if ((pAddr == 11) || (pAddr == 12)) { 
                         error->printError(nLine, ref.first,
                                          "Modificação de constante: \""
                                           + ref.first + "\".",
                                           sb::errorType::semantic);
+                        error->hasError();
                     } else if ((pAddr == 4) && (assembly[lAddr].first == 0)) {
                         error->printError(nLine, ref.first,
                                          "Divisão por zero/inválido: \""
                                           + ref.first + "\".",
                                           sb::errorType::semantic);
+                        error->hasError();
                     }
                 }
             }

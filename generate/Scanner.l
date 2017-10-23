@@ -46,6 +46,13 @@
     }
     return token::COMMA;
 }
+\+[ \t] {
+    if (DEBUG) {
+        const std::string blue = COLOR(sb::color::blue);
+        std::cout << blue << "Scanner: " << OFF << "PLUS token " << std::endl;
+    }
+    return token::PLUS;
+}
 TEXT {
     if (DEBUG) {
         const std::string blue = COLOR(sb::color::blue);
@@ -179,8 +186,7 @@ CONST {
     }
     return token::CONST;
 }
-
-[+-]*0x[0-9a-fA-F]+[ \n\t] {
+[+-]*0x[0-9a-fA-F]+[ \n\t,] {
     std::string str(yytext);
     yyless(str.length() - 1);
     int num = std::stoi(yytext, 0, 16);
@@ -191,7 +197,7 @@ CONST {
     }
     return token::NUM;
 }
-[+-]*(0x)*[0-9]+[ \n\t] {
+[+-]*[0-9]+[ \n\t,] {
     std::string str(yytext);
     yyless(str.length() - 1);
     int num = std::stoi(yytext);
