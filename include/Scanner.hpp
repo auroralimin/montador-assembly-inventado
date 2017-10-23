@@ -1,14 +1,14 @@
-#ifndef SB_PRE_SCANNER_HPP
-#define SB_PRE_SCANNER_HPP
+#ifndef MONT_PRE_SCANNER_HPP
+#define MONT_PRE_SCANNER_HPP
 
 #if ! defined(yyFlexLexerOnce)
 #include <FlexLexer.h>
 #endif
 
-#include "Parser.hxx"
-#include "location.hh"
+#include "montador/Parser.hxx"
+#include "montador/location.hh"
 
-namespace sb {
+namespace mont {
     /**
      * @brief Classe responisável pelo scanner do montador
      * Essa classe utiliza-se de recursos do Flex (por vezes redefinindo-os)
@@ -33,8 +33,8 @@ namespace sb {
             /**
              * @brief Redefinição de yylex
              */
-            virtual int yylex(sb::Parser::semantic_type * const lval,
-                              sb::Parser::location_type *location);
+            virtual int yylex(mont::Parser::semantic_type * const lval,
+                              mont::Parser::location_type *location);
 
             /**
              * @brief Fornece a linha que está sendo analisada pelo scanner
@@ -54,7 +54,7 @@ namespace sb {
              */
             int processInvalidToken();
 
-            sb::Parser::semantic_type *yylval = nullptr;
+            mont::Parser::semantic_type *yylval = nullptr;
             /**< salva informações do token */
             int nLine = 0; /**< salva o número atual da linha */
     };

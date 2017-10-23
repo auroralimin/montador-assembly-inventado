@@ -2,12 +2,12 @@
 %require  "3.0"
 %debug
 %defines
-%define api.namespace {sb}
+%define api.namespace {mont}
 %define parser_class_name {Parser}
 %define api.value.type variant
 
 %code requires {
-     namespace sb {
+     namespace mont {
         class Driver;
         class Scanner;
         class Error;
@@ -19,7 +19,7 @@
 %parse-param {Error *mError}
 
 %code{
-    #include "Driver.hpp"
+    #include "DriverMontador.hpp"
     #include "Error.hpp"
    
     #include <exception>
@@ -107,7 +107,7 @@ line
     | double_label end_line {
           mError->printError(scanner.getLine(), "", 
                              "Dois rótulos na mesma linha: \"" + $1 + "\".",
-                             sb::errorType::sintatic);
+                             mont::errorType::sintatic);
           mError->hasError();
       }
     ;
@@ -122,7 +122,7 @@ label
               eMsg = "Declaração/Rótulo repetido: aparição anterior de \""
                      + $1 + "\" foi na linha " + std::to_string(old) + ".";
               mError->printError(scanner.getLine(), "", eMsg, 
-                                 sb::errorType::semantic);
+                                 mont::errorType::semantic);
               mError->hasError();
           }
       }
@@ -135,7 +135,7 @@ label
               eMsg = "Declaração/Rótulo repetido: aparição anterior de \""
                      + $1 + "\" foi na linha " + std::to_string(old) + ".";
               mError->printError(scanner.getLine(), "", eMsg, 
-                                 sb::errorType::semantic);
+                                 mont::errorType::semantic);
               mError->hasError();
           }
       }
@@ -148,7 +148,7 @@ command
               std::string eMsg;
               eMsg = "Instrução na seção errada: deveria estar na seção TEXT.";
               mError->printError(scanner.getLine(), "", eMsg,
-                                 sb::errorType::semantic);
+                                 mont::errorType::semantic);
               mError->hasError();
           }
           $$ = $1;
@@ -158,7 +158,7 @@ command
               std::string eMsg;
               eMsg = "Diretiva na seção errada: deveria estar na seção DATA.";
               mError->printError(scanner.getLine() + 1, "", eMsg,
-                                 sb::errorType::semantic);
+                                 mont::errorType::semantic);
               mError->hasError();
           }
           $$ = $1;
@@ -171,11 +171,11 @@ command
           if (driver.getSection() == sec::data) {
               mError->printError(scanner.getLine(), str,
                                  "Diretiva inválida: \"" + str + "\".",
-                                 sb::errorType::semantic);
+                                 mont::errorType::semantic);
           } else {
               mError->printError(scanner.getLine(), str,
                                  "Instrução inválida: \"" + str + "\".",
-                                 sb::errorType::semantic);
+                                 mont::errorType::semantic);
           }
           mError->hasError();
     }
@@ -190,7 +190,7 @@ instruction
           } else {
               mError->printError(scanner.getLine(), "", 
                                  mError->instError(instructions[$1-1],nArgs,0),
-                                 sb::errorType::sintatic);
+                                 mont::errorType::sintatic);
               mError->hasError();
           }
       }
@@ -205,7 +205,7 @@ instruction
           } else {
               mError->printError(scanner.getLine(), $2.second, 
                                  mError->instError(instructions[$1-1],nArgs,1),
-                                 sb::errorType::sintatic);
+                                 mont::errorType::sintatic);
               mError->hasError();
           }
       }
@@ -222,7 +222,7 @@ instruction
           std::string eMsg = "Tipo de argumento inválido: \"" +
                              std::to_string($2) + "\" não é um rótulo.";
           mError->printError(scanner.getLine(), std::to_string($2),
-                             eMsg, sb::errorType::sintatic);
+                             eMsg, mont::errorType::sintatic);
           mError->hasError();
 
       }
@@ -233,7 +233,7 @@ instruction
           std::string eMsg = mError->instError(instructions[$1 - 1],
                                                nArgs, $2.first);
           mError->printError(scanner.getLine(), str, 
-                             eMsg,sb::errorType::sintatic);
+                             eMsg,mont::errorType::sintatic);
           mError->hasError();
       }
     ;
@@ -262,12 +262,12 @@ inst_name
 section
     : SECTION TEXT {
           driver.textSection();
-          driver.setSection(sb::sec::text);
+          driver.setSection(mont::sec::text);
           $$ = 0;
       }
     | SECTION DATA {
           driver.dataSection();
-          driver.setSection(sb::sec::data);
+          driver.setSection(mont::sec::data);
           $$ = 0;
       }
     | SECTION inst_dir {
@@ -278,7 +278,7 @@ section
           std::string eMsg2 = "espera-se \"TEXT\" ou \"DATA\", obteu-se \""
                               + $2.second + "\".";
           mError->printError(scanner.getLine(), str,
-                             eMsg + eMsg2, sb::errorType::sintatic);
+                             eMsg + eMsg2, mont::errorType::sintatic);
           mError->hasError();
       }
     | SECTION {
@@ -286,7 +286,7 @@ section
           std::string eMsg;
           eMsg = "Seção inválida: é necessário informar se é TEXT ou DATA.";
           mError->printError(scanner.getLine(), "", eMsg,
-                             sb::errorType::sintatic);
+                             mont::errorType::sintatic);
           mError->hasError();
       }
     ;
@@ -307,7 +307,7 @@ directive
           std::string eMsg = "Tipo de argumento inválido: \"" + $2 +
                              "\" não é um número.";
           mError->printError(scanner.getLine(), str,
-                             eMsg, sb::errorType::sintatic);
+                             eMsg, mont::errorType::sintatic);
           mError->hasError();
       }
     | CONST NUM {
@@ -324,7 +324,7 @@ directive
           std::string eMsg = "Tipo de argumento inválido: \"" + $2 +
                              "\" não é um número.";
           mError->printError(scanner.getLine(), str,
-                             eMsg, sb::errorType::sintatic);
+                             eMsg, mont::errorType::sintatic);
           mError->hasError();
       }
     ;
@@ -359,7 +359,7 @@ name
           int nLine = scanner.getLine();
           nLine = mError->hasSubstr(nLine, $1) ? nLine : nLine + 1;
           mError->printError(nLine, $1, "Token inválido: \"" + $1 + "\".",
-                            sb::errorType::lexical);
+                            mont::errorType::lexical);
           mError->hasError();
       }
     ;
@@ -376,7 +376,7 @@ end_line
 
 %%
 
-void sb::Parser::error(const location_type &l, const std::string &errMsg) {
+void mont::Parser::error(const location_type &l, const std::string &errMsg) {
     UNUSED_VAR l;
     UNUSED_VAR errMsg;
 }

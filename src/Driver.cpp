@@ -4,158 +4,132 @@
 #include <fstream>
 #include <iostream>
 
-#include "OutFormat.hpp"
 #include "MapException.hpp"
+
+#define UNUSED_VAR (void)
+
+#define BOLD      "\e[1m"
+#define OFF       "\e[0m"
+#define COLOR(id) "\033[1;3" + std::to_string(id) + "m"
 
 sb::Driver::Driver(std::string src) : src(src) {}
 
-void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
-    Error *error = new Error(src);
-    sb::Scanner *scanner = new sb::Scanner(&srcStream);
-    sb::Parser *parser = new sb::Parser(*scanner, *this, error);
+void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
+    sb::PreScanner *preScanner = new sb::PreScanner(&srcStream);
+    sb::PreParser *preParser = new sb::PreParser(*preScanner, *this);
 
-    addr = 0;
-    text = data = -1;
-    cSec = sb::sec::none;
     const int accept(0);
-    if (parser->parse() != accept) {
-        std::cerr << "Erro imprevisto na montagem." << std::endl;
+    if (preParser->parse() != accept) {
+        std::cerr << "Erro imprevisto no pré-processamento." << std::endl;
         exit(EXIT_FAILURE);
     }
+
+    writePreOutput(dst);
+
+    return;
+}
+
+void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
     
-    if (text == -1) {
-        error->hasError();
-        error->printError(0, "", "Seção TEXT faltante.",
-                          sb::errorType::semantic);
-    }
-    solveRef(error);
-    if (!error->getErrorFlag()) writeBin(dst);
-}
-
-void sb::Driver::writeBin(std::string dst) {
-    std::ofstream out;
-    out.open(dst);
-    for (auto n : assembly) {
-        out << n.first << " ";
-    }
-    out << std::endl;
-    out.close();
-}
-
-
-void sb::Driver::insertRef(std::string label) {
-    if (DEBUG) {
-        const std::string cyan = COLOR(sb::color::cyan);
-        std::cout << cyan << "Driver: " << OFF;
-        std::cout << "Insere Ref: " << label << " " << addr << std::endl;
-    }
-    refMap[label].push_back(addr);
-}
-
-void sb::Driver::assembler(int value, int nLine) {
-    assembly.push_back(std::make_pair(value, nLine));
-    addr++;
-}
-
-void sb::Driver::solveRef(Error *error) {
-    for (auto ref : refMap) {
-        std::map<std::string, std::tuple<int, int, bool> >::iterator it;
-        it = labelMap.find(ref.first);
-        if (it != labelMap.end()) {
-            for (auto n : ref.second) {
-                int aAddr = assembly.at(n).first;
-                int nLine = assembly.at(n).second;
-                int lAddr = std::get<0>(it->second);
-
-                if (DEBUG) {
-                    const std::string cyan = COLOR(sb::color::cyan);
-                    std::cout << cyan << "Driver: " << OFF;
-                    std::cout << "lAddr " << ref.first << " " << lAddr
-                              << std::endl;
-                }
-                assembly[n] = std::make_pair(lAddr + aAddr, nLine);
-
-                int pAddr = assembly[n - 1].first;
-                int pLine = assembly[n - 1].second;
-                if (((pAddr > 4) && (pAddr < 9)) &&
-                    ((lAddr < text) || ((text < data) && (lAddr >= data)))) {
-                    error->printError(pLine, ref.first,
-                                      "Pulo para seção inválida: \""
-                                      + ref.first + "\".",
-                                      sb::errorType::semantic);
-                    error->hasError();
-                } else if (std::get<2>(it->second)) {
-                    if (pAddr == 9) { 
-                        error->printError(nLine + 1, ref.first,
-                                         "Modificação de constante: \""
-                                          + ref.first + "\".",
-                                          sb::errorType::semantic);
-                        error->hasError();
-                    } else if ((pAddr == 11) || (pAddr == 12)) { 
-                        error->printError(nLine, ref.first,
-                                         "Modificação de constante: \""
-                                          + ref.first + "\".",
-                                          sb::errorType::semantic);
-                        error->hasError();
-                    } else if ((pAddr == 4) && (assembly[lAddr].first == 0)) {
-                        error->printError(nLine, ref.first,
-                                         "Divisão por zero/inválido: \""
-                                          + ref.first + "\".",
-                                          sb::errorType::semantic);
-                        error->hasError();
-                    }
-                }
-            }
-        } else {
-            for (auto n : ref.second) {
-                int nLine = assembly[n].second;
-                error->printError(nLine, ref.first,
-                                  "Declaração/Rótulo ausente: \""
-                                  + ref.first + "\".", sb::errorType::semantic);
-
-                int pAddr = assembly[n - 1].first;
-                int pLine = assembly[n - 1].second;
-                if ((pAddr > 4) && (pAddr < 9)) {
-                    error->printError(pLine, ref.first,
-                                      "Pulo para rótulo inválido: \""
-                                      + ref.first + "\".",
-                                      sb::errorType::semantic);
-                }
-            }
-            error->hasError();
-        }
-    }
-}
-
-void sb::Driver::dataSection() {
-    data = addr;
-}
-
-void sb::Driver::textSection() {
-    text = addr;
-}
-
-void sb::Driver::setSection(sb::sec s) {
-    cSec = s;
-}
-
-int sb::Driver::getSection() {
-    return cSec;
-}
-
-int sb::Driver::insertLabel(std::string label, int dec, int nLine, bool c) {
-    if (DEBUG) {
-        const std::string cyan = COLOR(sb::color::cyan);
-        std::cout << cyan << "Driver: " << OFF;
-        std::cout << "Insere Label: " << label << " " << addr-dec << std::endl;
-    }
-    if (labelMap.find(label) != labelMap.end()) {
-        int oldLine = std::get<1>(labelMap.at(label));
-        labelMap[label] = std::make_tuple(addr - dec, nLine, c);
-        return oldLine;
-    }
+    // cria arquivo intermediário
+    std::ofstream file;
+    file.open("macro_intermediario.txt");
+    file << srcStream.rdbuf();
+    file.close();
     
-    labelMap[label] = std::make_tuple(addr - dec, nLine, c);
-    return -1;
+    // chama o programa que abre as macros
+    system((std::string("./src/macro/macro_exec ") + dst + " 0").c_str());
+    
+    return;
+}
+
+void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
+    
+    // cria arquivo intermediário
+    std::ofstream file;
+    file.open("macro_intermediario.txt");
+    file << srcStream.rdbuf();
+    file.close();
+    
+    // chama o programa que abre as macros
+    system((std::string("./src/macro/macro_exec ") + dst + " 1").c_str());
+}
+
+bool sb::Driver::hasSubstr(int nLine, std::string substr) {
+    std::ifstream f(src);
+    std::string line;
+    for (int i = 1; i <= nLine; i++) std::getline(f, line);
+
+    return (line.find(substr) != std::string::npos);
+}
+
+void sb::Driver::printError(int nLine, std::string begin, std::string msg,
+                            sb::errorType type) {
+    const std::string red    = COLOR(sb::color::red);
+    const std::string green  = COLOR(sb::color::green);
+    const std::string purple = COLOR(sb::color::purple);
+
+    std::ifstream f(src);
+    std::string line;
+    for (int i = 1; i <= nLine; i++) std::getline(f, line);
+
+    std::size_t col = line.find(begin);
+
+    std::cout << BOLD << src << ":" << nLine << ":" << col + 1 << ":" << OFF;
+    switch (type) {
+        case sb::errorType::lexical:
+            std::cout << red << " Erro léxico: " << OFF;
+            break;
+        case sb::errorType::sintatic:
+            std::cout << red << " Erro sintático: " << OFF;
+            break;
+        case sb::errorType::semantic:
+            std::cout << red << " Erro semântico: " << OFF;
+            break;
+        case sb::errorType::warning:
+            std::cout << purple << " Aviso: " << OFF;
+            break;
+    }
+    std::cout << BOLD << msg << OFF << std::endl;
+
+    std::cout << line << std::endl << green;
+    for (unsigned long i = 0; i < col; i++)
+        std::cout << "~";
+    std::cout << "^" << std::endl << OFF;
+}
+
+void sb::Driver::writePreOutput(std::string dst) {
+    std::ofstream output;
+    output.open(dst);
+    for (auto line : preMap) {
+            output << line.second << std::endl;
+    }
+    output.close();
+}
+
+void sb::Driver::insertEqu(std::string label, int value) {
+    equMap[label] = value;
+}
+
+void sb::Driver::insertLine(int nLine, std::string line) {
+    preMap[nLine] = line;
+}
+
+void sb::Driver::deleteLine(int nLine) {
+    std::map<int, std::string>::iterator it = preMap.find(nLine);
+
+    if (it == preMap.end()) return;
+    preMap.erase(it);
+}
+
+int sb::Driver::getEqu(std::string label) {
+    std::map<std::string, int>::iterator it = equMap.find(label);
+
+    if (it == equMap.end()) {
+        MapException e;
+        throw e;
+    }
+
+    return it->second;
 }
 

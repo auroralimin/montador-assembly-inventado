@@ -1,11 +1,11 @@
-#ifndef SB_ERROR_HPP
-#define SB_ERROR_HPP
+#ifndef MONT_ERROR_HPP
+#define MONT_ERROR_HPP
 
 #include <string>
 
-namespace sb {
+namespace mont {
     /**
-     * @enum sp::errorType
+     * @enum mont::errorType
      * @brief Enum para os tipos de erro a serem mostrados
      */
     enum errorType {
@@ -36,7 +36,7 @@ namespace sb {
              * @param begin é um std::string contendo onde na linha o erro\
              *        começou
              * @param msg é um std::string contendo o corpo da mensagem de erro
-             * @para type é um sb::errorType contendo o tipo do erro
+             * @para type é um mont::errorType contendo o tipo do erro
              */
             void printError(int nLine, std::string begin,
                             std::string msg, errorType type);

@@ -1,5 +1,5 @@
-#ifndef SB_OUT_FORMAT_HPP
-#define SB_OUT_FORMAT_HPP
+#ifndef MONT_OUT_FORMAT_HPP
+#define MONT_OUT_FORMAT_HPP
 
 /**
  * @def DEBUG
@@ -25,7 +25,7 @@
  */
 #define COLOR(id) "\033[1;3" + std::to_string(id) + "m"
 
-namespace sb {
+namespace mont {
     /**
      * @enum sp::color
      * @brief Enum para os ids das cores no cout
