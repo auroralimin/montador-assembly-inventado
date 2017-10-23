@@ -37,8 +37,8 @@ namespace mac{
         friend MacroParser;
     private:
         
-        void insertEqu(std::string label, int value);
-        int getEqu(std::string label);
+        void insertMac(std::string label, std::string value);
+        std::string getMac(std::string label);
         void printError(int nLine, std::string begin,
                         std::string msg, errorType type);
         bool hasSubstr(int nLine, std::string substr);
@@ -48,8 +48,8 @@ namespace mac{
         void deleteLine(int nLine);
         
         std::string src;
-        std::map<std::string, int> equMap;
-        std::map<int, std::string> preMap;
+        std::map<std::string, std::string> macMap; // map com as macros
+        std::map<int, std::string> wmacMap; // map com macros expandidas
     };
 }
 

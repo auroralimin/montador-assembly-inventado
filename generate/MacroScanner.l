@@ -40,13 +40,13 @@
     if (DEBUG) std::cout << "COMMA token" << std::endl;
     return token::COMMA;
 }
-IF {
-    if (DEBUG) std::cout << "IF token" << std::endl;
-    return token::IF;
+MACRO {
+    if (DEBUG) std::cout << "MACRO token" << std::endl;
+    return token::MACRO;
 }
-EQU {
-    if (DEBUG) std::cout << "EQU token" << std::endl;
-    return token::EQU;
+ENDMACRO {
+    if (DEBUG) std::cout << "ENDMACRO token" << std::endl;
+    return token::ENDMACRO;
 }
 CONST {
     if (DEBUG) std::cout << "CONST token" << std::endl;

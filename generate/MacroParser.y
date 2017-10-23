@@ -28,13 +28,16 @@
 
     #define UNUSED_VAR (void)
 
-    bool equif = true;
+    bool onMacro = false;
+
+    std::string tempMacro = "";
+    std::string labelMacro = "";
 }
 
 %token               ENDL
 %token               COMMA
-%token               IF
-%token               EQU
+%token               MACRO
+%token               ENDMACRO
 %token               CONST
 %token <std::string> LABEL
 %token <std::string> INVALID
@@ -50,52 +53,59 @@
 
 %%
 
-pre_processor
-    : equ      pre_processor
-    | equ
-    | if       pre_processor
-    | if
-    | line     pre_processor
+macro_processor
+    : macro    macro_processor
+    | macro
+    | end_macro macro_processor
+    | end_macro
+    | line     macro_processor
     | line
-    | end_line pre_processor
+    | end_line macro_processor
     | end_line
     ;
 line
-    : LABEL end_line {
-          $$ = $1;
-          if (equif) {
-              driver.insertLine(macroScanner.getLine(), $$);
-          } else {
-              equif = true;
-          }
+    :LABEL end_line {
+	$$ = $1;
+	
+	if(onMacro){
+		tempMacro.append($$);
+		tempMacro.append("\n");
+	}else{		
+
+		driver.insertLine(macroScanner.getLine(), $$);
+	}
+
       }
     | LABEL command end_line {
-          $$ = $1 + " " + $2;
-          if (equif) {
-              driver.insertLine(macroScanner.getLine(), $$);
-              equif = true;
-          } else {
-              equif = true;
-          }
+	$$ = $1 + " " + $2;
+	if(onMacro){
+		tempMacro.append($$);
+		tempMacro.append("\n");
+	}else{
+		driver.insertLine(macroScanner.getLine(), $$);
+	}              
       }
     | command end_line {
-          $$ = $1;
-          if (equif) {
-              driver.insertLine(macroScanner.getLine(), $$);
-              equif = true;
-          } else {
-              equif = true;
-          }
+	$$ = $1;
+
+	if(onMacro){
+		tempMacro.append($$);
+		tempMacro.append("\n");
+	}else{
+		try {
+			$$ = driver.getMac($$);
+			driver.insertLine(macroScanner.getLine(), $$);
+		} catch (std::exception &e) {
+			$$ = $1;
+			driver.insertLine(macroScanner.getLine(), $$);
+		}
+	}
       }
     ;
 
 command
     : name command {
-          try {
-              $$ = std::to_string(driver.getEqu($1)) + " " + $2;
-          } catch (std::exception &e) {
-              $$ = $1 + " " + $2;
-          }
+          $$ = $1 + " " + $2;
       }
     | CONST NUM {
           $$ = "CONST " + std::to_string($2);
@@ -104,87 +114,57 @@ command
           $$ = "CONST " + $2;
       }
     | name {
-          try {
-              $$ = std::to_string(driver.getEqu($1));
-          } catch (std::exception &e) {
-              $$ = $1;
-          }
+          $$ = $1;
       }
     ;
 
 name
     : NAME {
-          try {
-              $$ = std::to_string(driver.getEqu($1));
-          } catch (mac::MapException &e) {
-              $$ = $1;
-          }
-
+          $$ = $1;
       }
     | NAME COMMA {
-          try {
-              $$ = std::to_string(driver.getEqu($1)) + ",";
-          } catch (mac::MapException &e) {
-              $$ = $1 + ",";
-          }
+          $$ = $1 + ",";
       }
     | INVALID {
           int nLine = macroScanner.getLine();
           nLine = driver.hasSubstr(nLine, $1) ? nLine : nLine + 1;
           driver.printError(nLine, $1, "Token inválido: \"" + $1 + "\".",
                             mac::errorType::lexical);
-          try {
-              $$ = std::to_string(driver.getEqu($1));
-          } catch (mac::MapException &e) {
-              $$ = $1;
-          }
+          $$ = $1;
       }
     | INVALID COMMA {
           int nLine = macroScanner.getLine();
           nLine = driver.hasSubstr(nLine, $1) ? nLine : nLine + 1;
           driver.printError(nLine, $1, "Token inválido: \"" + $1 + "\".",
                             mac::errorType::lexical);
-          try {
-              $$ = std::to_string(driver.getEqu($1)) + ",";
-          } catch (mac::MapException &e) {
-              $$ = $1 + ",";
-          }
+          $$ = $1 + ",";
       }
  
     ;
 
-equ
-    : LABEL EQU NUM end_line {
-          std::string label($1);
-          label = label.substr(0, label.length() - 1);
-          driver.insertEqu(label, $3);
+macro
+    : LABEL MACRO {
+	std::string label($1);
+	label = label.substr(0, label.length() - 1);
+	labelMacro = label;
+	onMacro = true;
+	
       }
-    | LABEL end_line EQU NUM end_line {
-          std::string label($1);
-          label = label.substr(0, label.length() - 1);
-          driver.insertEqu(label, $4);
+    | LABEL end_line MACRO end_line {
+	std::string label($1);
+	label = label.substr(0, label.length() - 1);
+	labelMacro = label;
+	onMacro = true;
       }
     ;
 
-if
-    : IF NAME line {
-          int nLine = macroScanner.getLine();
-          try {
-              equif = driver.getEqu($2) ? true : false;
-          } catch (mac::MapException &e) {
-              driver.printError(nLine, $2, "IF para rótulo EQU não declarado.",
-                                mac::errorType::warning);
-          }
+end_macro
+    : ENDMACRO {
+	onMacro = false;
+	driver.insertMac(labelMacro, tempMacro);
+	labelMacro = "";
+	tempMacro = "";
       }
-    | IF NAME {
-          int nLine = macroScanner.getLine();
-          try {
-              equif = driver.getEqu($2) ? true : false;
-          } catch (mac::MapException &e) {
-              driver.printError(nLine, $2, "IF para rótulo EQU não declarado.",
-                                mac::errorType::warning);
-          }
-    }
     ;
 
 end_line

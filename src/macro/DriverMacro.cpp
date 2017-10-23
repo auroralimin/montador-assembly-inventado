@@ -82,31 +82,31 @@ void mac::Driver::printError(int nLine, std::string begin, std::string msg,
 void mac::Driver::writeMacroOutput(std::string dst) {
     std::ofstream output;
     output.open(dst);
-    for (auto line : preMap) {
+    for (auto line : wmacMap) {
             output << line.second << std::endl;
     }
     output.close();
 }
 
-void mac::Driver::insertEqu(std::string label, int value) {
-    equMap[label] = value;
+void mac::Driver::insertMac(std::string label, std::string value) {
+    macMap[label] = value;
 }
 
 void mac::Driver::insertLine(int nLine, std::string line) {
-    preMap[nLine] = line;
+    wmacMap[nLine] = line;
 }
 
 void mac::Driver::deleteLine(int nLine) {
-    std::map<int, std::string>::iterator it = preMap.find(nLine);
+    std::map<int, std::string>::iterator it = wmacMap.find(nLine);
 
-    if (it == preMap.end()) return;
-    preMap.erase(it);
+    if (it == wmacMap.end()) return;
+    wmacMap.erase(it);
 }
 
-int mac::Driver::getEqu(std::string label) {
-    std::map<std::string, int>::iterator it = equMap.find(label);
+std::string mac::Driver::getMac(std::string label) {
+    std::map<std::string, std::string>::iterator it = macMap.find(label);
 
-    if (it == equMap.end()) {
+    if (it == macMap.end()) {
         MapException e;
         throw e;
     }
