@@ -24,8 +24,12 @@ void sb::Error::printError(int nLine, std::string begin, std::string msg,
         col = -1;
     }
 
-
-    std::cout << BOLD << src << ":" << nLine << ":" << col + 1 << ":" << OFF;
+    
+    if (col == std::string::npos) {
+        std::cout << BOLD << src << ":l:c:" << OFF;
+    } else {
+        std::cout << BOLD << src << ":" << nLine << ":" << col + 1 << ":" << OFF;
+    }
     switch (type) {
         case sb::errorType::lexical:
             std::cout << red << " Erro léxico: " << OFF;
@@ -42,7 +46,7 @@ void sb::Error::printError(int nLine, std::string begin, std::string msg,
     }
     std::cout << BOLD << msg << OFF << std::endl;
 
-    if (nLine > 0) {
+    if ((nLine > 0) && (col != std::string::npos)) {
         std::cout << line << std::endl << green;
         for (unsigned long i = 0; i < col; i++)
             std::cout << "~";
