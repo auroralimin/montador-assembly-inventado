@@ -5,8 +5,8 @@
 #include <FlexLexer.h>
 #endif
 
-#include "PreParser.hxx"
-#include "location.hh"
+#include "pre/PreParser.hxx"
+#include "pre/location.hh"
 
 namespace sb{
     class PreScanner : public yyFlexLexer{

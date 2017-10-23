@@ -1,25 +1,25 @@
 %{
-    #include "PreScanner.hpp"
+    #include "MacroScanner.hpp"
 
     #include <string>
 
-    #include "Driver.hpp"
-    #include "pre/PreParser.hxx"
+    #include "DriverMacro.hpp"
+    #include "macro/MacroParser.hxx"
 
-    using token = sb::PreParser::token;
+    using token = mac::MacroParser::token;
     int yycolumn = 1;
 
     #undef  YY_DECL
-    #define YY_DECL int sb::PreScanner::yylex(\
-                            sb::PreParser::semantic_type *const lval,\
-                            sb::PreParser::location_type *location)
+    #define YY_DECL int mac::MacroScanner::yylex(\
+                            mac::MacroParser::semantic_type *const lval,\
+                            mac::MacroParser::location_type *location)
     #define yyterminate()   static int once = 0;\
                             return once++ ? token::ENDL : token::END;
     #define YY_NO_UNISTD_H
     #define YY_USER_ACTION location->step(); location->columns(yyleng);
 %}
 
-%option yyclass="sb::PreScanner"
+%option yyclass="mac::MacroScanner"
 %option debug
 %option yylineno
 %option nodefault
@@ -88,11 +88,11 @@ CONST {
 [ \t] ;
 %%
 
-int sb::PreScanner::getLine() {
+int mac::MacroScanner::getLine() {
     return nLine;
 }
 
-int sb::PreScanner::processInvalidToken() {
+int mac::MacroScanner::processInvalidToken() {
     std::string invalid(yytext);
     yylval->build<std::string>(invalid);
     if (!invalid.compare(invalid.length() - 1, 1, ":")) {

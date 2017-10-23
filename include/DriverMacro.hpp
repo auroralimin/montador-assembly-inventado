@@ -1,5 +1,5 @@
-#ifndef SB_DRIVER_HPP
-#define SB_DRIVER_HPP
+#ifndef MAC_DRIVER_HPP
+#define MAC_DRIVER_HPP
 
 #include <string>
 #include <cstddef>
@@ -7,12 +7,12 @@
 #include <cstdlib>
 #include <map>
 
-#include "PreScanner.hpp"
-#include "pre/PreParser.hxx"
+#include "MacroScanner.hpp"
+#include "macro/MacroParser.hxx"
 
 #define DEBUG false
 
-namespace sb{
+namespace mac{
     enum errorType {
         lexical,
         sintatic,
@@ -30,11 +30,11 @@ namespace sb{
     public:
         Driver(std::string src);
         virtual ~Driver() {};
-        void preProcess    (std::istream &srcStream, std::string dst);
         void macroProcess  (std::istream &srcStream, std::string dst);
         void onePassProcess(std::istream &srcStream, std::string dst);
         
-        friend PreParser;
+        
+        friend MacroParser;
     private:
         
         void insertEqu(std::string label, int value);
@@ -44,7 +44,7 @@ namespace sb{
         bool hasSubstr(int nLine, std::string substr);
         void insertLine(int nLine, std::string line);
         
-        void writePreOutput(std::string dst);
+        void writeMacroOutput(std::string dst);
         void deleteLine(int nLine);
         
         std::string src;
