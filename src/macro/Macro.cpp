@@ -15,21 +15,21 @@ void checkStream(std::string srcFile, std::ifstream &stream);
 std::string createOutName(std::string dst, std::string ext);
 
 int main(int argc, char **argv) {
-    if (argc < 3) {
+    if (argc < 4) {
         std::cerr << "É necessário especificar: "
-                     "<arquivo de saída> <argumento>"
+                     "<arquivo de entrada> <arquivo de saída> <argumento>"
                   << std::endl;
         return EXIT_FAILURE;
     }
 
-    std::string dst(argv[1]), flag(argv[2]);
+    std::string src(argv[1]), dst(argv[2]), flag(argv[3]);
 
-    mac::Driver *driver = new mac::Driver(argv[2]);
+    mac::Driver *driver = new mac::Driver(argv[1]);
     if (flag == "0") {
-        process(driver, "macro_intermediario.txt", dst, PType::mcr);
+        process(driver, argv[1], dst, PType::mcr);
     }
     else if (flag == "1") {
-        std::string mcr = process(driver, "macro_intermediario.txt", dst, PType::mcr);
+        std::string mcr = process(driver, argv[1], dst, PType::mcr);
         process(driver, mcr.c_str(), dst, PType::o);
     }
     else {
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 std::string process(mac::Driver *driver, const char *src,
                     std::string dst, PType pType) {
     std::string ext[2] = {".mcr", ".o"};
-    dst = createOutName(dst, ext[pType]);
+    dst = createOutName(subs, ext[pType]);
     std::ifstream stream(src);
     checkStream(src, stream);
 
@@ -62,12 +62,9 @@ std::string process(mac::Driver *driver, const char *src,
                 std::cout << "OnePass src = " << src
                           << ", OnePass dst = " << dst << std::endl;
             }
-            driver->onePassProcess(stream, dst);
+            driver->onePassProcess(dst);
             break;
     }
-    
-    //exclui o arquivo intermediario de macro
-    system((std::string("rm -f macro_intermediario.txt")).c_str());
     
     return dst;
 }

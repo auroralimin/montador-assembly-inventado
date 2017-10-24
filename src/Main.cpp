@@ -72,14 +72,14 @@ std::string process(sb::Driver *driver, const char *src,
                 std::cout << "Macro src = " << src
                           << ", Macro dst = " << dst << std::endl;
             }
-            driver->macroProcess(stream, dst);
+            driver->macroProcess(dst);
             break;
         case o:
             if (DEBUG) {
                 std::cout << "OnePass src = " << src
                           << ", OnePass dst = " << dst << std::endl;
             }
-            driver->onePassProcess(stream, dst);
+            driver->onePassProcess(dst);
             break;
     }
 

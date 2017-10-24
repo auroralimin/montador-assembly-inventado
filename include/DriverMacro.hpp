@@ -31,7 +31,7 @@ namespace mac{
         Driver(std::string src);
         virtual ~Driver() {};
         void macroProcess  (std::istream &srcStream, std::string dst);
-        void onePassProcess(std::istream &srcStream, std::string dst);
+        void onePassProcess(std::string dst);
         
         
         friend MacroParser;

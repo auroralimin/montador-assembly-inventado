@@ -29,30 +29,24 @@ void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
     return;
 }
 
-void sb::Driver::macroProcess(std::istream &srcStream, std::string dst) {
+void sb::Driver::macroProcess(std::string dst) {
     
-    // cria arquivo intermediário
-    std::ofstream file;
-    file.open("macro_intermediario.txt");
-    file << srcStream.rdbuf();
-    file.close();
+    std::string subs = dst.substr(0, dst.length()-4);
+    subs.append(".pre");
     
     // chama o programa que abre as macros
-    system((std::string("./src/macro/macro_exec ") + dst + " 0").c_str());
+    system((std::string("./src/macro/macro_exec ") + subs + " " + dst + " 0").c_str());
     
     return;
 }
 
-void sb::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
+void sb::Driver::onePassProcess(std::string dst) {
     
-    // cria arquivo intermediário
-    std::ofstream file;
-    file.open("macro_intermediario.txt");
-    file << srcStream.rdbuf();
-    file.close();
+    std::string subs = dst.substr(0, dst.length()-2);
+    subs.append(".pre");
     
     // chama o programa que abre as macros
-    system((std::string("./src/macro/macro_exec ") + dst + " 1").c_str());
+    system((std::string("./src/macro/macro_exec ") + subs + " " + dst + " 1").c_str());
 }
 
 bool sb::Driver::hasSubstr(int nLine, std::string substr) {

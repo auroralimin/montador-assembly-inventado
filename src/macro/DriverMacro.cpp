@@ -30,15 +30,13 @@ void mac::Driver::macroProcess(std::istream &srcStream, std::string dst) {
     return;
 }
 
-void mac::Driver::onePassProcess(std::istream &srcStream, std::string dst) {
-    // cria arquivo intermediário
-    std::ofstream file;
-    file.open("mont_intermediario.txt");
-    file << srcStream.rdbuf();
-    file.close();
+void mac::Driver::onePassProcess(std::string dst) {
+    
+    std::string subs = dst.substr(0, dst.length()-2);
+    subs.append(".mcr");
     
     // chama o programa que abre as macros
-    system((std::string("./src/montador/mont_exec ") + dst).c_str());
+    system((std::string("./src/montador/mont_exec ") + subs + " " + dst).c_str());
     
     return;
 }
