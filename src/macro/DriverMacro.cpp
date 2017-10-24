@@ -30,13 +30,9 @@ void mac::Driver::macroProcess(std::istream &srcStream, std::string dst) {
     return;
 }
 
-void mac::Driver::onePassProcess(std::string dst) {
-    
-    std::string subs = dst.substr(0, dst.length()-2);
-    subs.append(".mcr");
-    
+void mac::Driver::onePassProcess(std::string src, std::string dst) {
     // chama o programa que abre as macros
-    system((std::string("./src/montador/mont_exec ") + subs + " " + dst).c_str());
+    system((std::string("./src/montador/mont_exec ") + src + " " + dst).c_str());
     
     return;
 }

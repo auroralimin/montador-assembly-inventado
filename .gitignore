@@ -27,6 +27,8 @@
 *.out
 *.app
 montador
+macro_exec
+mont_exec
 
 # Arquivos gerados
 *.cxx

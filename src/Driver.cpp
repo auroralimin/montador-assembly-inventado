@@ -29,24 +29,16 @@ void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
     return;
 }
 
-void sb::Driver::macroProcess(std::string dst) {
-    
-    std::string subs = dst.substr(0, dst.length()-4);
-    subs.append(".pre");
-    
+void sb::Driver::macroProcess(std::string src, std::string dst) {
     // chama o programa que abre as macros
-    system((std::string("./src/macro/macro_exec ") + subs + " " + dst + " 0").c_str());
+    system((std::string("./src/macro/macro_exec ") + src + " " + dst + " 0").c_str());
     
     return;
 }
 
-void sb::Driver::onePassProcess(std::string dst) {
-    
-    std::string subs = dst.substr(0, dst.length()-2);
-    subs.append(".pre");
-    
+void sb::Driver::onePassProcess(std::string src, std::string dst) {
     // chama o programa que abre as macros
-    system((std::string("./src/macro/macro_exec ") + subs + " " + dst + " 1").c_str());
+    system((std::string("./src/macro/macro_exec ") + src + " " + dst + " 1").c_str());
 }
 
 bool sb::Driver::hasSubstr(int nLine, std::string substr) {

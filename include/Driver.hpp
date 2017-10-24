@@ -31,8 +31,8 @@ namespace sb{
         Driver(std::string src);
         virtual ~Driver() {};
         void preProcess    (std::istream &srcStream, std::string dst);
-        void macroProcess  (std::string dst);
-        void onePassProcess(std::string dst);
+        void macroProcess  (std::string src, std::string dst);
+        void onePassProcess(std::string src, std::string dst);
         
         friend PreParser;
     private:

@@ -10,10 +10,8 @@ enum PType {
     o
 };
 
-std::string process(sb::Driver *driver, const char *src,
+std::string process(sb::Driver *driver, std::string src,
                     std::string dst, PType pType);
-void checkStream(std::string srcFile, std::ifstream &stream);
-std::string createOutName(std::string dst, std::string ext);
 
 int main(int argc, char **argv) {
     if (argc < 4) {
@@ -32,16 +30,18 @@ int main(int argc, char **argv) {
     }
 
     sb::Driver *driver = new sb::Driver(argv[2]);
+    std::string str(argv[2]);
     if (flag == "-p") {
-        process(driver, argv[2], dst, PType::pre);
+        process(driver, str, dst, PType::pre);
     }
     else if (flag == "-m") {
-        std::string pre = process(driver, argv[2], dst, PType::pre);
-        process(driver, pre.c_str(), dst, PType::mcr);
+        str = process(driver, str, dst, PType::pre);
+        process(driver, str, dst, PType::mcr);
     }
     else if (flag == "-o") {
-        std::string pre = process(driver, argv[2], dst, PType::pre);
-        process(driver, pre.c_str(), dst, PType::o);
+         str = process(driver, str, dst, PType::pre);
+         str = process(driver, str, dst, PType::mcr);
+         process(driver, str, dst, PType::o);
     }
     else {
         delete driver;
@@ -56,12 +56,23 @@ int main(int argc, char **argv) {
     return EXIT_SUCCESS;
 }
 
-std::string process(sb::Driver *driver, const char *src,
+std::string process(sb::Driver *driver, std::string src,
                     std::string dst, PType pType) {
     std::string ext[3] = {".pre", ".mcr", ".o"};
-    dst = createOutName(dst, ext[pType]);
+    dst = dst.substr(0, dst.find(".")) + ext[pType];
+   
+    //Coloca endl no final do arquivo de entrada para evitar problemas
+    std::ofstream oFile;
+    oFile.open(src, std::ios_base::app);
+    oFile << std::endl;
+    oFile.close();
+
     std::ifstream stream(src);
-    checkStream(src, stream);
+    if (!stream.good()) {
+        std::cerr << "Não foi possível abrir o arquivo:"
+                 << src << "." << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     switch (pType) {
         case pre:
@@ -72,31 +83,17 @@ std::string process(sb::Driver *driver, const char *src,
                 std::cout << "Macro src = " << src
                           << ", Macro dst = " << dst << std::endl;
             }
-            driver->macroProcess(dst);
+            driver->macroProcess(src, dst);
             break;
         case o:
             if (DEBUG) {
                 std::cout << "OnePass src = " << src
                           << ", OnePass dst = " << dst << std::endl;
             }
-            driver->onePassProcess(dst);
+            driver->onePassProcess(src, dst);
             break;
     }
 
-    return dst;
-}
-
-void checkStream(std::string file, std::ifstream &stream) {
-    if (!stream.good()) {
-        std::cerr << "Não foi possível abrir o arquivo:"
-                 << file << "." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-}
-
-std::string createOutName(std::string dst, std::string ext) {
-    const int eLen = ext.length(), dLen = dst.length();
-    if ((dLen < eLen) || (dst.compare(dLen - eLen, eLen, ext))) dst = dst + ext;
     return dst;
 }
 
