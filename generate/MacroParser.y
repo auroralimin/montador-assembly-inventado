@@ -79,10 +79,12 @@ line
     | LABEL command end_line {
 	$$ = $1 + " " + $2;
 	if(onMacro){
-		tempMacro.append($$);
-		tempMacro.append("\n");
-	}else{
-		driver.insertLine(macroScanner.getLine(), $$);
+        tempMacro.append($$);
+        tempMacro.append("\n");
+    }else{
+        int nLine = macroScanner.getLine();
+        nLine = !driver.hasLine(nLine) ? nLine : nLine + 1;
+        driver.insertLine(nLine, $$);
 	}              
       }
     | command end_line {

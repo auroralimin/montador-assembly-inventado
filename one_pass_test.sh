@@ -8,8 +8,8 @@ BOLD=$(tput bold)
 OFF='\033[0m'
 
 echo "---------------------------------------------"
-for file in ${testdir}/*.mcr; do
-    name=`basename ${file} .mcr`".o"
+for file in ${testdir}/*.asm; do
+    name=`basename ${file} .asm`".o"
     ./montador $file ${name} > /dev/null
     echo "${BOLD}Montando ${name}:${OFF}"
     if diff ${name} ${resultdir}/${name} 

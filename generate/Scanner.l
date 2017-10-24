@@ -31,8 +31,12 @@
 %{
     yylval = lval;
 %}
+linha.[0-9]+ {
+    std::string str(yytext);
+    str = str.substr(6, str.length());
+    nLine = atoi(str.c_str()) - 1;
+}
 \n {
-    nLine++;
     if (DEBUG) {
         const std::string blue = COLOR(mont::color::blue);
         std::cout << blue << "Scanner: " << OFF << "ENDL token" << std::endl;

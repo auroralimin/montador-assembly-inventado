@@ -31,14 +31,14 @@ void sb::Driver::preProcess(std::istream &srcStream, std::string dst) {
 
 void sb::Driver::macroProcess(std::string src, std::string dst) {
     // chama o programa que abre as macros
-    system((std::string("./src/macro/macro_exec ") + src + " " + dst + " 0").c_str());
+    system((std::string("./src/macro/macro_exec ") + src + " " + dst + " " + this->src).c_str());
     
     return;
 }
 
 void sb::Driver::onePassProcess(std::string src, std::string dst) {
     // chama o programa que abre as macros
-    system((std::string("./src/macro/macro_exec ") + src + " " + dst + " 1").c_str());
+    system((std::string("./src/montador/mont_exec ") + src + " " + dst + " " + this->src).c_str());
 }
 
 bool sb::Driver::hasSubstr(int nLine, std::string substr) {
@@ -88,7 +88,8 @@ void sb::Driver::writePreOutput(std::string dst) {
     std::ofstream output;
     output.open(dst);
     for (auto line : preMap) {
-            output << line.second << std::endl;
+            output << "linha." << std::to_string(line.first) << " "
+                   << line.second << std::endl;
     }
     output.close();
 }

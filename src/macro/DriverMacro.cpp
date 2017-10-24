@@ -30,13 +30,6 @@ void mac::Driver::macroProcess(std::istream &srcStream, std::string dst) {
     return;
 }
 
-void mac::Driver::onePassProcess(std::string src, std::string dst) {
-    // chama o programa que abre as macros
-    system((std::string("./src/montador/mont_exec ") + src + " " + dst).c_str());
-    
-    return;
-}
-
 bool mac::Driver::hasSubstr(int nLine, std::string substr) {
     std::ifstream f(src);
     std::string line;
@@ -84,7 +77,8 @@ void mac::Driver::writeMacroOutput(std::string dst) {
     std::ofstream output;
     output.open(dst);
     for (auto line : wmacMap) {
-            output << line.second << std::endl;
+            output << "linha." << std::to_string(line.first) << " "
+                   << line.second << std::endl;
     }
     output.close();
 }
@@ -95,6 +89,10 @@ void mac::Driver::insertMac(std::string label, std::string value) {
 
 void mac::Driver::insertLine(int nLine, std::string line) {
     wmacMap[nLine] = line;
+}
+
+bool mac::Driver::hasLine(int nLine) {
+    return (wmacMap.find(nLine) != wmacMap.end());
 }
 
 void mac::Driver::deleteLine(int nLine) {

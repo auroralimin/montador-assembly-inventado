@@ -31,7 +31,6 @@ namespace mac{
         Driver(std::string src);
         virtual ~Driver() {};
         void macroProcess  (std::istream &srcStream, std::string dst);
-        void onePassProcess(std::string src, std::string dst);
         
         friend MacroParser;
     private:
@@ -42,6 +41,7 @@ namespace mac{
                         std::string msg, errorType type);
         bool hasSubstr(int nLine, std::string substr);
         void insertLine(int nLine, std::string line);
+        bool hasLine(int nLine);
         
         void writeMacroOutput(std::string dst);
         void deleteLine(int nLine);

@@ -61,12 +61,6 @@ std::string process(sb::Driver *driver, std::string src,
     std::string ext[3] = {".pre", ".mcr", ".o"};
     dst = dst.substr(0, dst.find(".")) + ext[pType];
    
-    //Coloca endl no final do arquivo de entrada para evitar problemas
-    std::ofstream oFile;
-    oFile.open(src, std::ios_base::app);
-    oFile << std::endl;
-    oFile.close();
-
     std::ifstream stream(src);
     if (!stream.good()) {
         std::cerr << "Não foi possível abrir o arquivo:"

@@ -10,3 +10,4 @@ INPUT SPACE ;faz esta opera ̧c~ao se L2 for verdadeiro
 SECTION DATA
 N: SPACE
 
+

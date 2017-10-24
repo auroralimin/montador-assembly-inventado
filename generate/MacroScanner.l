@@ -13,8 +13,7 @@
     #define YY_DECL int mac::MacroScanner::yylex(\
                             mac::MacroParser::semantic_type *const lval,\
                             mac::MacroParser::location_type *location)
-    #define yyterminate()   static int once = 0;\
-                            return once++ ? token::ENDL : token::END;
+    #define yyterminate() return token::END
     #define YY_NO_UNISTD_H
     #define YY_USER_ACTION location->step(); location->columns(yyleng);
 %}
@@ -31,8 +30,12 @@
 %{
     yylval = lval;
 %}
+linha.[0-9]+ {
+    std::string str(yytext);
+    str = str.substr(6, str.length());
+    nLine = atoi(str.c_str());
+}
 \n {
-    nLine++;
     if (DEBUG) std::cout << "ENDL token" << std::endl;
     return token::ENDL;
 }
