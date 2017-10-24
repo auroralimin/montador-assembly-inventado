@@ -1,7 +1,11 @@
 # Assembler
 
-Esse trabalho está sendo implementado como requisito da disciplina Software Básico da Universidade de Brasília (UnB).
-Ele consiste em um Montador do assembly inventado especificado a seguir.
+Esse trabalho foi implementado como requisito da disciplina Software Básico da Universidade de Brasília (UnB).
+Ele consiste em um Montador do assembly inventado especificado na próxima seção.
+
+Para implementá-lo, foram utilizadas as bibliotecas/utilitários Bison e Flex, responsável pera geração de código dos scanners e parser implementados. Para evitar conflitos da biblioteca, estão sendo gerados executaveis diferentes para cada processo da montagem, todos chamados pelo executavel montador (que é o que deve ser utilizado para testar o projeto, como explicado em seções abaixo.
+
+Vale lembrar que pelo código dos scanners e parser ser gerado, ele não é tão legível quanto o resto das classes implementadas na mão do projeto. Caso deseje ter um entendimento melhor de como os mesmos foram gerados, analise os arquivos .l e .y que constam na pasta generate.
 
 ## Assembly inventado
 A linguagem de montagem utilizada será a linguagem simbólica hipotética apresentada em sala de aula.
@@ -123,9 +127,11 @@ O montador deve:
   </tr>
   <tr>
     <td rowspan="10">Análise semântica</td>
-    <td>Instruções inválidas (supõe mneumônico desconhecido na seção TEXT) </td>
   </tr>
   <td>Diretivas inválidas (supõe mneumônico desconhecido na seção DATA) </td>
+  </tr>
+  <tr>
+    <td>Instruções inválidas (supõe mneumônico desconhecido na seção TEXT) </td>
   </tr>
   <tr>
     <td>Declarações e rótulos ausentes</td>
@@ -157,6 +163,10 @@ O montador deve:
   
     $ make
     
+## Como gerar a documentação
+
+    $ make doc
+
 ## Como executar
 
 ### Pre-processador sem macros
@@ -171,6 +181,12 @@ O montador deve:
 
     $ ./assembler -o <seu programa>.asm <arquivo de saída>.o
     
+## Dependências
+
+Como mencionado acima, esse projeto depende do Bison e do Flex. O uso de ambos foi autorizado pelo professor da disciplina e ambos geralmente já vem incluídos nos pacotes de utilitários essenciais (build essentials).
+
+Ressalta-se a necessidade do Bison com versão 3.o ou superior e do Flex com versão 2.5 ou superior. Por serem utilitários GNU padrões, se necessário é possível atualizar ambos de forma padrão (com apt-get em distribuições Ubuntu, por exemplo).
+
 ## Diretrizes do projeto
 
 O código será escrito com o padrão "Camel Case". 
