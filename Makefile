@@ -18,6 +18,9 @@ MACRO_PATH = macro
 MONT_PATH = montador
 PRE_PATH = pre
 
+# Caminho para as documentações geradas do código
+DOC_PATH = doc
+
 # Caminho para arquivos Flex e Bison
 GEN_PATH = generate
 
@@ -112,7 +115,7 @@ release: all
 
 # Regra para limpar/deletar todos os arquivos e diretórios criados pelo make
 clean:
-	rm -rf $(BIN_PATH) $(DEP_PATH) $(INC_PATH)/$(PRE_PATH) $(INC_PATH)/$(MACRO_PATH) $(INC_PATH)/$(MONT_PATH) 
+	rm -rf $(BIN_PATH) $(DEP_PATH) $(INC_PATH)/$(PRE_PATH) $(INC_PATH)/$(MACRO_PATH) $(INC_PATH)/$(MONT_PATH) $(DOC_PATH)
 	rm -f $(EXEC) $(SRC_PATH)/$(MACRO_PATH)/$(MA_EXEC) $(SRC_PATH)/$(MONT_PATH)/$(MO_EXEC) $(SRC_PATH)/$(PRE_PATH)/*.cxx $(SRC_PATH)/$(MACRO_PATH)/*.cxx $(SRC_PATH)/$(MONT_PATH)/*.cxx $(INC_PATH)/*.hxx $(INC_PATH)/*.hh
 
 # Gera o código do scanner e do parser e coloca-os nas pastas corretas
@@ -138,10 +141,14 @@ generate:
 # Regra para printar uma variável no terminal. Auxilia no debug do Makefile
 print-% : ; @echo $* = $($*)
 
+# Regra para gerar a documentação com Doxygen
+doc:
+	doxygen Doxyfile
+
 # Regra que estabelece que arquivos .d são "preciosos"
 .PRECIOUS: $(DEP_PATH)/%.d
 # Regra que torna as dependências "phony"
-.PHONY: debug clean release generate
+.PHONY: debug clean release generate doc
 
 # Inclui as regras geradas pelos arquivos de dependência
 -include $(DEP_FILES)
