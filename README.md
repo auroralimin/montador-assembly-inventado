@@ -7,6 +7,12 @@ Para implementá-lo, foram utilizadas as bibliotecas/utilitários Bison e Flex, 
 
 Vale lembrar que pelo código dos scanners e parser ser gerado, ele não é tão legível quanto o resto das classes implementadas na mão do projeto. Caso deseje ter um entendimento melhor de como os mesmos foram gerados, analise os arquivos .l e .y que constam na pasta generate.
 
+Alunos:
+Aurora Li Min de Freitas Wan 13/0006408
+Renato Estevam Nogueira 13/0036579
+
+https://github.com/auroralimin/montador-assembly-inventado/
+
 ## Assembly inventado
 A linguagem de montagem utilizada será a linguagem simbólica hipotética apresentada em sala de aula.
 Esta linguagem e formada por um conjunto de apenas 14 instruções.
