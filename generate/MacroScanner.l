@@ -48,8 +48,9 @@ ENDMACRO {
     if (DEBUG) std::cout << "ENDMACRO token" << std::endl;
     return token::ENDMACRO;
 }
-CONST {
+CONST|SPACE {
     if (DEBUG) std::cout << "CONST token" << std::endl;
+    yylval->build<std::string>(yytext);
     return token::CONST;
 }
 [+-]*0x[0-9a-fA-F]+[ \n\t] {
@@ -73,13 +74,13 @@ CONST {
     yylval->build<std::string>(yytext);
     return token::LABEL;
 }
-[^ \n\t:]*[^ \n\ta-z0-9_,:]+[^ \n\t:]*:* {
+[^ \n\t:]*[^ \n\ta-z0-9_,:+;]+[^ \n\t:]*:* {
     return processInvalidToken();
 }
 [0-9]+[^ \n\t0-9]+[^ \n\t]*:* {
     return processInvalidToken();
 }
-[a-z_]+[a-z0-9_]* {
+[a-z_+]+[a-z0-9_]* {
     if (DEBUG) std::cout << "NAME token: \"" << yytext << "\"" << std::endl;
     yylval->build<std::string>(yytext);
     return token::NAME;

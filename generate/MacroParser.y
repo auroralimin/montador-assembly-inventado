@@ -38,7 +38,7 @@
 %token               COMMA
 %token               MACRO
 %token               ENDMACRO
-%token               CONST
+%token <std::string> CONST
 %token <std::string> LABEL
 %token <std::string> INVALID
 %token <std::string> NAME
@@ -107,15 +107,17 @@ command
     : name command {
           $$ = $1 + " " + $2;
       }
+    | CONST { $$ = $1; }
     | CONST NUM {
-          $$ = "CONST " + std::to_string($2);
+          $$ = $1 + " " + std::to_string($2);
       }
     | CONST name {
-          $$ = "CONST " + $2;
+          $$ = $1+ " " + $2;
       }
     | name {
           $$ = $1;
       }
+    | NUM { $$ = std::to_string($1); }
     ;
 
 name
